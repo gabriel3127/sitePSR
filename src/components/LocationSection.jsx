@@ -29,10 +29,10 @@ const LocationSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="rounded-2xl overflow-hidden shadow-elevated h-[400px]"
+            className="rounded-2xl overflow-hidden shadow-elevated h-full min-h-[400px]"
           >
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3838.8!2d-47.95!3d-15.82!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sCEASA+Bras%C3%ADlia!5e0!3m2!1spt-BR!2sbr!4v1"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3838.5!2d-47.946408!3d-15.7886105!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935a311d2a52c945%3A0x3495b53058238b45!2sPSR%20Embalagens!5e0!3m2!1spt-BR!2sbr!4v1"
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -63,7 +63,7 @@ const LocationSection = () => {
                     CEP: 71200-100
                   </p>
                   <a
-                    href="https://maps.google.com/?q=CEASA+Brasilia"
+                    href="https://maps.app.goo.gl/si3YPWmrvmkxojZC6"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 mt-2 text-sm font-semibold text-primary hover:underline"

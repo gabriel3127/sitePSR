@@ -8,11 +8,10 @@ const WA_LINK = "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%
 
 const navLinks = [
   { label: "Produtos", href: "#produtos" },
-  { label: "Catálogo", href: "/catalogo", isRoute: true },
+  { label: "Cat\u00e1logo", href: "/catalogo", isRoute: true },
   { label: "Blog", href: "/blog", isRoute: true },
   { label: "Depoimentos", href: "/depoimentos", isRoute: true },
   { label: "Sobre", href: "#sobre" },
-  { label: "Contato", href: "#contato" },
 ];
 
 const Navbar = () => {
@@ -32,12 +31,15 @@ const Navbar = () => {
         scrolled ? "glass border-b shadow-card" : "bg-transparent"
       }`}
     >
-      <div className="container flex items-center justify-between h-16">
+      <div className="container grid grid-cols-3 items-center h-16">
+
+        {/* Logo \u2014 esquerda */}
         <Link to="/" className="flex items-center gap-2">
           <img src={psrLogo} alt="PSR Embalagens" className="h-10" />
         </Link>
 
-        <div className="hidden lg:flex items-center gap-8">
+        {/* Links \u2014 centro */}
+        <div className="hidden lg:flex items-center justify-center gap-8">
           {navLinks.map((link) =>
             link.isRoute ? (
               <Link
@@ -61,23 +63,28 @@ const Navbar = () => {
               </a>
             )
           )}
+        </div>
+
+        {/* Botão — direita */}
+        <div className="hidden lg:flex items-center justify-end">
           <a
-            href={WA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#contato"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
           >
-            Falar no WhatsApp
+            Fale Conosco
           </a>
         </div>
 
-        <button
-          onClick={() => setOpen(!open)}
-          className="lg:hidden p-2 text-foreground"
-          aria-label="Menu"
-        >
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {/* Hamburguer \u2014 mobile */}
+        <div className="lg:hidden col-start-3 flex justify-end">
+          <button
+            onClick={() => setOpen(!open)}
+            className="p-2 text-foreground"
+            aria-label="Menu"
+          >
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>

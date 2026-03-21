@@ -1,29 +1,29 @@
 ﻿import { motion } from "framer-motion";
-import { MapPin, Truck, HeadphonesIcon, BadgeDollarSign } from "lucide-react";
+import { MapPin, Truck, MessageCircle, Package } from "lucide-react";
 
 const differentials = [
   {
     icon: MapPin,
     title: "Localização Estratégica",
-    desc: "CEASA, Brasília — coração da distribuição no DF para agilidade máxima na entrega.",
+    desc: "Na CEASA de Brasília — no coração da distribuição do DF, o que garante agilidade e estoque sempre abastecido.",
     gradient: "from-primary/10 to-primary/5",
   },
   {
     icon: Truck,
-    title: "Entrega Grátis no DF",
-    desc: "Rotas diárias cobrindo todo o Distrito Federal e entorno sem custo adicional.",
+    title: "Entrega Grátis",
+    desc: "Rotas diárias cobrindo todo o Distrito Federal e região do entorno sem custo adicional.",
     gradient: "from-accent/10 to-accent/5",
   },
   {
-    icon: HeadphonesIcon,
-    title: "Consultoria Especializada",
-    desc: "Atendimento personalizado para encontrar a solução ideal para seu segmento.",
+    icon: MessageCircle,
+    title: "Atendimento Direto",
+    desc: "Fale com quem entende de embalagem. Atendimento via WhatsApp com resposta rápida e sem enrolação.",
     gradient: "from-primary/10 to-primary/5",
   },
   {
-    icon: BadgeDollarSign,
-    title: "Melhor Custo-Benefício",
-    desc: "Preços competitivos direto da distribuidora, sem intermediários.",
+    icon: Package,
+    title: "Variedade de Marcas",
+    desc: "Trabalhamos com as principais marcas do mercado — descartáveis, biodegradáveis, food service e muito mais.",
     gradient: "from-accent/10 to-accent/5",
   },
 ];
@@ -40,10 +40,10 @@ const SocialProof = () => {
           className="text-center mb-12"
         >
           <p className="text-sm font-semibold text-primary tracking-wide uppercase mb-3">
-            Por que nos escolher?
+            Por que a PSR?
           </p>
           <h2 className="text-3xl md:text-4xl font-extrabold font-display text-foreground text-balance">
-            Diferenciais que fazem a diferença no seu negócio
+            Direto ao ponto: o que você ganha trabalhando com a gente
           </h2>
         </motion.div>
 
@@ -71,5 +71,3 @@ const SocialProof = () => {
 };
 
 export default SocialProof;
-
-

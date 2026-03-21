@@ -1,109 +1,155 @@
 ﻿import { motion } from "framer-motion";
-import { ArrowRight, Star, CheckCircle } from "lucide-react";
+import { ArrowRight, MessageCircle, MapPin } from "lucide-react";
 import heroImg from "@/assets/hero-packaging.jpg";
 
-const WA_LINK = "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20personalizado.%20Podem%20me%20ajudar?";
+const WA_LINK =
+  "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20personalizado.%20Podem%20me%20ajudar?";
+
+const stats = [
+  { value: "15+", suffix: "anos", label: "no mercado de Brasília" },
+  { value: "1.000", suffix: "+", label: "clientes satisfeitos" },
+  { value: "4.9", suffix: "★", label: "no Google" },
+];
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-24 pb-16 md:pt-32 md:pb-28 overflow-hidden bg-[#EEF3FB]">
-      <div className="absolute top-20 -left-40 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
+    <section className="relative pt-24 pb-16 md:pt-32 md:pb-28 overflow-hidden bg-[#F4F7FC]">
+      {/* Fundo sutil */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-[#1A50A0]/5 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#F5C200]/8 blur-[80px]" />
+      </div>
 
       <div className="container relative">
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          {/* Texto */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide uppercase mb-6">
-              <Star className="w-3.5 h-3.5 fill-primary" />
-              PSR Embalagens — Desde 2010
+            {/* Localização */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#1A50A0]/15 text-[#1A50A0] text-xs font-medium mb-6 shadow-sm">
+              <MapPin className="w-3 h-3" />
+              Brasília · DF e Entorno
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold font-display text-foreground leading-[1.1] text-balance">
-              Embalagens profissionais para{" "}
-              <span className="text-[#1A50A0]">seu negócio crescer</span>
+            <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold text-[#0D1B2A] leading-[1.1] tracking-tight text-balance">
+              Embalagens para{" "}
+              <span className="text-[#1A50A0]">quem vende de verdade</span>
             </h1>
 
-            <p className="mt-6 text-lg text-muted-foreground text-balance max-w-lg leading-relaxed">
-              A distribuidora de embalagens mais completa de Brasília.
-              Descartáveis, biodegradáveis e delivery com entrega grátis no DF.
+            <p className="mt-5 text-[1.05rem] text-[#4A5568] leading-relaxed max-w-[480px]">
+              Fornecemos embalagens das melhores marcas do mercado para
+              indústrias, comércios e negócios de food service no DF e região
+              do entorno. Atendimento direto, estoque pronto e entrega grátis.
             </p>
 
-            <div className="mt-4 flex flex-col gap-2">
-              {["Entrega grátis para todo o DF", "Mais de 1.000 clientes satisfeitos", "Estoque pronto para envio imediato"].map((item) => (
-                <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                  {item}
+            {/* Diferenciais reais */}
+            <div className="mt-6 grid grid-cols-1 gap-2.5">
+              {[
+                "Entrega grátis no DF e entorno",
+                "Estoque disponível — sem espera por pedido mínimo",
+                "Atendimento via WhatsApp com resposta rápida",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-2.5">
+                  <div className="mt-0.5 w-4 h-4 rounded-full bg-[#1A50A0]/10 flex items-center justify-center shrink-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#1A50A0]" />
+                  </div>
+                  <span className="text-sm text-[#4A5568]">{item}</span>
                 </div>
               ))}
             </div>
 
+            {/* CTAs */}
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <a
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-lg gradient-primary text-primary-foreground font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/25"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-lg bg-[#1A50A0] text-white font-semibold hover:bg-[#153F80] transition-colors shadow-md shadow-[#1A50A0]/20"
               >
-                Solicitar Orçamento
-                <ArrowRight className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4" />
+                Pedir Orçamento no WhatsApp
               </a>
               <a
                 href="/catalogo"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-lg bg-card text-foreground font-semibold shadow-card hover:shadow-card-hover transition-all border border-border"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-lg bg-white text-[#0D1B2A] font-semibold border border-[#D1DAE8] hover:border-[#1A50A0]/40 transition-colors"
               >
                 Ver Catálogo
+                <ArrowRight className="w-4 h-4" />
               </a>
             </div>
 
-            <div className="mt-10 flex items-center gap-8">
-              {[
-                { value: "15+", label: "Anos no mercado" },
-                { value: "1000+", label: "Clientes ativos" },
-                { value: "4.9★", label: "No Google" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="text-2xl font-extrabold font-display text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
-                </div>
+            {/* Stats */}
+            <div className="mt-10 flex items-center gap-8 pt-8 border-t border-[#1A50A0]/10">
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.1, duration: 0.4 }}
+                >
+                  <p className="text-2xl font-extrabold text-[#0D1B2A] leading-none">
+                    {stat.value}
+                    <span className="text-[#1A50A0]">{stat.suffix}</span>
+                  </p>
+                  <p className="text-xs text-[#718096] mt-1">{stat.label}</p>
+                </motion.div>
               ))}
             </div>
           </motion.div>
 
+          {/* Imagem */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
             className="relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-elevated">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-[#1A50A0]/10">
               <img
                 src={heroImg}
-                alt="Embalagens descartáveis e biodegradáveis para delivery e comércio em Brasília DF"
+                alt="Embalagens para delivery, food service e comércio em Brasília DF"
                 className="w-full aspect-[4/3] object-cover"
                 loading="eager"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent" />
+              {/* Overlay sutil no rodapé da imagem */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/15 to-transparent" />
             </div>
 
+            {/* Card flutuante — avaliação Google */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.8, duration: 0.4 }}
-              className="absolute -bottom-4 -left-4 md:-left-6 bg-card rounded-xl shadow-elevated p-4 flex items-center gap-3 animate-float"
+              className="absolute -bottom-5 -left-5 md:-left-7 bg-white rounded-xl shadow-xl border border-[#E8EDF5] p-4 flex items-center gap-3"
             >
-              <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
-                <Star className="w-5 h-5 text-primary-foreground fill-primary-foreground" />
-              </div>
               <div>
-                <p className="font-bold font-display text-foreground text-sm">4.9 no Google</p>
-                <p className="text-xs text-muted-foreground">+80 avaliações</p>
+                <p className="font-bold text-[#0D1B2A] text-sm leading-tight">
+                  4.9 ★ no Google
+                </p>
+                <p className="text-xs text-[#718096] mt-0.5">
+                  Avaliado por clientes reais
+                </p>
               </div>
             </motion.div>
+
+            {/* Card flutuante — entrega */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.0, duration: 0.4 }}
+              className="absolute -top-4 -right-4 md:-right-6 bg-[#F5C200] rounded-xl shadow-lg p-3.5 flex items-center gap-2.5"
+            >
+              <MapPin className="w-4 h-4 text-[#1A3060] shrink-0" />
+              <p className="text-xs font-semibold text-[#1A3060] leading-tight">
+                Entrega grátis<br />DF e Entorno
+              </p>
+            </motion.div>
           </motion.div>
+
         </div>
       </div>
     </section>

@@ -11,21 +11,50 @@ const Clock = ({ className, ...props }) => (
   </svg>
 );
 
+const ramos = [
+  "Restaurante",
+  "Hamburgueria / Lanchonete",
+  "Mercado / Supermercado",
+  "Padaria / Confeitaria",
+  "Food service / Delivery",
+  "Indústria",
+  "Comércio em geral",
+  "Evento / Buffet",
+  "Farmácia / Drogaria",
+];
+
 const ConversionSection = () => {
-  const [form, setForm] = useState({ nome: "", telefone: "", email: "", mensagem: "" });
+  const [form, setForm] = useState({
+    nome: "",
+    telefone: "",
+    ramo: "",
+    mensagem: "",
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const msg = `Olá! Meu nome é ${form.nome}. ${form.mensagem} | Tel: ${form.telefone} | Email: ${form.email}`;
-    window.open(`https://wa.me/5561993177107?text=${encodeURIComponent(msg)}`, "_blank");
+    const partes = [
+      "Olá! Vim pelo site da PSR Embalagens.",
+      "",
+      "*Nome:* " + form.nome,
+      "*Telefone:* " + form.telefone,
+      ...(form.ramo ? ["*Ramo:* " + form.ramo] : []),
+      "",
+      "*Mensagem:*",
+      form.mensagem,
+    ];
+    const msg = partes.join("\n");
+    window.open("https://wa.me/5561993177107?text=" + encodeURIComponent(msg), "_blank");
   };
+
+  const inputClass = "w-full px-4 py-3.5 rounded-xl bg-background/10 text-background placeholder:text-background/40 border border-background/15 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all";
 
   return (
     <section id="contato" className="py-16 md:py-28 gradient-dark relative overflow-hidden">
       <div className="absolute top-0 left-0 w-72 h-72 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-accent/10 blur-3xl" />
 
-      <div className="container max-w-5xl relative">
+      <div className="container max-w-6xl relative">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -44,8 +73,10 @@ const ConversionSection = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-5 gap-8">
-            <form onSubmit={handleSubmit} className="space-y-4 md:col-span-3">
+          <div className="grid md:grid-cols-5 gap-8 items-stretch">
+
+            {/* Formulário — 3/5 */}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:col-span-3">
               <div className="grid sm:grid-cols-2 gap-4">
                 <input
                   type="text"
@@ -53,7 +84,7 @@ const ConversionSection = () => {
                   required
                   value={form.nome}
                   onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-background/10 text-background placeholder:text-background/40 border border-background/15 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                  className={inputClass}
                 />
                 <input
                   type="tel"
@@ -61,24 +92,30 @@ const ConversionSection = () => {
                   required
                   value={form.telefone}
                   onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-background/10 text-background placeholder:text-background/40 border border-background/15 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                  className={inputClass}
                 />
               </div>
+
               <input
-                type="email"
-                placeholder="Email *"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full px-4 py-3.5 rounded-xl bg-background/10 text-background placeholder:text-background/40 border border-background/15 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                type="text"
+                list="ramos-list"
+                placeholder="Ramo de atuação (opcional)"
+                value={form.ramo}
+                onChange={(e) => setForm({ ...form, ramo: e.target.value })}
+                className={inputClass}
               />
+              <datalist id="ramos-list">
+                {ramos.map((r) => (
+                  <option key={r} value={r} />
+                ))}
+              </datalist>
+
               <textarea
                 placeholder="Descreva o que precisa (produtos, quantidades, etc.) *"
                 required
-                rows={4}
                 value={form.mensagem}
                 onChange={(e) => setForm({ ...form, mensagem: e.target.value })}
-                className="w-full px-4 py-3.5 rounded-xl bg-background/10 text-background placeholder:text-background/40 border border-background/15 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all resize-none"
+                className={`${inputClass} resize-none flex-1 min-h-[180px]`}
               />
               <button
                 type="submit"
@@ -89,44 +126,48 @@ const ConversionSection = () => {
               </button>
             </form>
 
-            <div className="space-y-4 md:col-span-2">
+            {/* Cards — 2/5 */}
+            <div className="flex flex-col gap-4 md:col-span-2">
               <a
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-5 rounded-xl bg-background/10 border border-background/15 hover:bg-background/15 transition-all group"
+                className="block p-7 rounded-xl bg-background/10 border border-background/15 hover:bg-background/15 transition-all group"
               >
-                <MessageCircle className="w-6 h-6 text-primary mb-2" />
-                <h3 className="font-bold font-display text-background text-lg">WhatsApp Direto</h3>
-                <p className="text-background/60 text-sm mt-1">(61) 99317-7107</p>
-                <span className="inline-flex items-center gap-1 mt-2 text-sm font-semibold text-primary group-hover:gap-2 transition-all">
+                <MessageCircle className="w-7 h-7 text-primary mb-3" />
+                <h3 className="font-bold font-display text-background text-xl">WhatsApp Direto</h3>
+                <p className="text-background/60 text-base mt-1">(61) 99317-7107</p>
+                <span className="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-primary group-hover:gap-2 transition-all">
                   Iniciar conversa <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </a>
 
-              <div className="p-5 rounded-xl bg-background/10 border border-background/15">
-                <Clock className="w-6 h-6 text-primary mb-2" />
-                <h3 className="font-bold font-display text-background text-lg">Horário</h3>
-                <div className="text-background/60 text-sm mt-1 space-y-0.5">
-                  <p>Seg-Sex: 5h às 17h</p>
+              <div className="p-7 rounded-xl bg-background/10 border border-background/15">
+                <Clock className="w-7 h-7 text-primary mb-3" />
+                <h3 className="font-bold font-display text-background text-xl">Horário</h3>
+                <div className="text-background/60 text-base mt-2 space-y-1">
+                  <p>Segunda e Quinta: 5h às 17h</p>
+                  <p>Terça, Quarta e Sexta: 6h às 17h</p>
                   <p>Sábado: 5h às 12h</p>
+                  <p className="text-red-400 font-medium">Domingo: Fechado</p>
                 </div>
               </div>
 
-              <div className="p-5 rounded-xl bg-background/10 border border-background/15">
-                <Star className="w-6 h-6 text-accent mb-2 fill-accent" />
-                <h3 className="font-bold font-display text-background text-lg">4.9 no Google</h3>
-                <p className="text-background/60 text-sm mt-1">+80 avaliações de clientes</p>
+              <div className="p-7 rounded-xl bg-background/10 border border-background/15 flex-1">
+                <Star className="w-7 h-7 text-accent mb-3 fill-accent" />
+                <h3 className="font-bold font-display text-background text-xl">4.9 no Google</h3>
+                <p className="text-background/60 text-base mt-1">+40 avaliações de clientes reais</p>
                 <a
                   href="https://www.google.com/search?q=psr+embalagens+brasilia"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline mt-1 inline-block font-semibold"
+                  className="text-sm text-primary hover:underline mt-2 inline-block font-semibold"
                 >
                   Ver avaliações →
                 </a>
               </div>
             </div>
+
           </div>
         </motion.div>
       </div>
