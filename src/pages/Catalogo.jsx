@@ -1,6 +1,6 @@
 ﻿import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, ShoppingBag, X, Send, Plus, Minus, Pencil, Trash2, SlidersHorizontal, ChevronDown, User } from "lucide-react"
+import { Search, ShoppingBag, X, Send, Plus, Minus, Pencil, Trash2, SlidersHorizontal, ChevronDown, User, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import psrLogo from "@/assets/psr-logo.svg"
 import { Link } from "react-router-dom"
@@ -9,17 +9,40 @@ import { useAuth } from "@/contexts/AuthContext"
 import AdminBar from "@/components/AdminBar"
 import ProductModal from "@/components/ProductModal"
 import TaxonomyModal from "@/components/TaxonomyModal"
+import MobileBottomNav from "@/components/MobileBottomNav"
 import { supabase } from "@/lib/supabase"
+import TurnstileModal from "@/components/TurnstileModal"
 
 const WA_NUMBER = "5561993177107"
 const POR_PAGINA = 24
 const SIDEBAR_LIMIT = 5
+
+const SETOR_EMOJI = {
+  "festas-eventos":             "🎉",
+  "hamburguerias-lanchonetes":  "🍔",
+  "lavanderias":                "🫧",
+  "mercados-acougues":          "🛒",
+  "padarias-confeitarias":      "🥐",
+  "uso-geral":                  "📦",
+  default:                      "🏷️",
+}
+const getSetorEmoji = (slug) => SETOR_EMOJI[slug] || SETOR_EMOJI.default
+
+const extractStoragePath = (url) => {
+  try {
+    const marker = "/storage/v1/object/public/produtos/"
+    const idx = url.indexOf(marker)
+    if (idx === -1) return null
+    return decodeURIComponent(url.slice(idx + marker.length))
+  } catch { return null }
+}
 
 const loadCart = () => {
   try { return JSON.parse(localStorage.getItem("psr_cart")) || [] }
   catch { return [] }
 }
 
+// ─── Sidebar section (desktop) ───────────────────────────────────────────────
 const SidebarSection = ({ title, items, active, onSelect, onClear }) => {
   const [expanded, setExpanded] = useState(false)
   const activeItem = items.find(i => i.slug === active)
@@ -58,6 +81,76 @@ const SidebarSection = ({ title, items, active, onSelect, onClear }) => {
   )
 }
 
+// ─── Card mobile (layout vertical com foto grande) ───────────────────────────
+const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete }) => (
+  <Link to={`/catalogo/${product.id}`} className="block bg-card rounded-2xl overflow-hidden border border-border/50 active:scale-[0.99] transition-transform">
+    {/* foto grande */}
+    <div className="relative w-full aspect-square overflow-hidden bg-muted">
+      {product.foto_url ? (
+        <img src={product.foto_url} alt={product.nome} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+          <ShoppingBag className="w-12 h-12" />
+        </div>
+      )}
+      {inCart && (
+        <div className="absolute top-2 right-2 bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
+          {inCart.qty} na lista
+        </div>
+      )}
+      {product.categoria && (
+        <span className="absolute top-2 left-2 bg-white/90 text-primary text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+          {product.categoria.nome}
+        </span>
+      )}
+    </div>
+
+    {/* info + botão */}
+    <div className="p-3">
+      <h3 className="font-bold text-foreground text-sm leading-snug line-clamp-2">{product.nome}</h3>
+      {product.descricao && (
+        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.descricao}</p>
+      )}
+    </div>
+
+    {isAdmin && (
+      <div className="flex gap-2 px-3 pb-3 border-t border-border/30 pt-2" onClick={(e) => e.preventDefault()}>
+        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(product) }}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground border rounded px-2 py-1 transition-colors">
+          <Pencil className="w-3 h-3" /> Editar
+        </button>
+        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(product.id) }}
+          className="flex items-center gap-1 text-xs text-destructive border border-destructive/30 rounded px-2 py-1 transition-colors">
+          <Trash2 className="w-3 h-3" /> Excluir
+        </button>
+      </div>
+    )}
+  </Link>
+)
+
+// ─── Pills de setor mobile ────────────────────────────────────────────────────
+const MobileSetorPills = ({ setores, active, onSelect, onClear }) => (
+  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide px-4 lg:hidden">
+    <button onClick={onClear}
+      className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
+        !active ? "bg-primary text-white border-primary" : "bg-card text-muted-foreground border-border"
+      }`}>
+      <span className="text-base">🏪</span>
+      <span>Todos</span>
+    </button>
+    {setores.map((s) => (
+      <button key={s.slug} onClick={() => onSelect(s.slug)}
+        className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
+          active === s.slug ? "bg-primary text-white border-primary" : "bg-card text-muted-foreground border-border"
+        }`}>
+        <span className="text-base">{getSetorEmoji(s.slug)}</span>
+        <span className="max-w-[64px] text-center leading-tight line-clamp-2">{s.nome}</span>
+      </button>
+    ))}
+  </div>
+)
+
+// ═══════════════════════════════════════════════════════════════════════════════
 const Catalogo = () => {
   const { products, tipos, setores, categorias, loading } = useProducts()
   const { isAdmin } = useAuth()
@@ -74,6 +167,11 @@ const Catalogo = () => {
   const [editingProduct, setEditingProduct] = useState(null)
   const [taxonomyOpen, setTaxonomyOpen] = useState(false)
   const [showHelper, setShowHelper] = useState(() => localStorage.getItem("psr_helper_seen") !== "true")
+  const [turnstileOpen, setTurnstileOpen] = useState(false)
+
+  const WA_SEND_KEY = "psr_wa_sends"
+  const getWaSends = () => parseInt(sessionStorage.getItem(WA_SEND_KEY) || "0", 10)
+  const incWaSends = () => sessionStorage.setItem(WA_SEND_KEY, getWaSends() + 1)
 
   const toggleHelper = () => {
     if (showHelper) localStorage.setItem("psr_helper_seen", "true")
@@ -81,9 +179,16 @@ const Catalogo = () => {
   }
 
   const handleSaved = () => window.location.reload()
+
   const handleDelete = async (id) => {
     if (!confirm("Excluir este produto?")) return
+    const { data: prod } = await supabase.from("produtos").select("foto_url, fotos").eq("id", id).single()
     await supabase.from("produtos").delete().eq("id", id)
+    if (prod) {
+      const urls = prod.fotos?.length ? prod.fotos : [prod.foto_url].filter(Boolean)
+      const paths = urls.map(extractStoragePath).filter(Boolean)
+      if (paths.length) await supabase.storage.from("produtos").remove(paths)
+    }
     window.location.reload()
   }
 
@@ -100,7 +205,6 @@ const Catalogo = () => {
     })
   }, [products, search, activeTipo, activeCategoria, activeSetor])
 
-  // Opções disponíveis dado os filtros dos OUTROS seletores
   const setoresDisponiveis = useMemo(() => {
     return setores.filter(s =>
       products.some(p => {
@@ -108,8 +212,7 @@ const Catalogo = () => {
         const matchCat = !activeCategoria || p.categoria?.slug === activeCategoria
         const matchSearch = p.nome.toLowerCase().includes(search.toLowerCase()) ||
           (p.descricao || "").toLowerCase().includes(search.toLowerCase())
-        return matchTipo && matchCat && matchSearch &&
-          p.produto_setores?.some(ps => ps.setor?.slug === s.slug)
+        return matchTipo && matchCat && matchSearch && p.produto_setores?.some(ps => ps.setor?.slug === s.slug)
       })
     )
   }, [products, activeTipo, activeCategoria, search, setores])
@@ -141,7 +244,6 @@ const Catalogo = () => {
   const totalPaginas = Math.ceil(filtered.length / POR_PAGINA)
   const produtosVisiveis = useMemo(() => filtered.slice(0, pagina * POR_PAGINA), [filtered, pagina])
   const activeFiltersCount = [activeTipo, activeCategoria, activeSetor].filter(Boolean).length
-
   const clearFilters = () => { setActiveTipo(null); setActiveCategoria(null); setActiveSetor(null); setSearch(""); setPagina(1) }
 
   const addToCart = (e, product) => {
@@ -176,22 +278,43 @@ const Catalogo = () => {
 
   const totalItems = cart.reduce((sum, item) => sum + (item.qty || 0), 0)
 
-  const sendWhatsApp = () => {
+  const doSendWhatsApp = () => {
     const lines = cart.map((item) => `• ${item.nome} — Qtd: ${item.qty}`)
-    const msg = "Olá! Vim pelo catálogo online da PSR Embalagens e gostaria de solicitar orçamento:\n\n" +
-      lines.join("\n") + "\n\nPodem me passar preços e disponibilidade?"
+    const msg =
+      "Olá! Vim pelo catálogo online da PSR Embalagens e gostaria de solicitar orçamento:\n\n" +
+      lines.join("\n") +
+      "\n\nPodem me passar preços e disponibilidade?"
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank")
+    incWaSends()
+  }
+  
+  const sendWhatsApp = () => {
+    if (getWaSends() < 2) {
+      // 1ª e 2ª vez: libera direto
+      doSendWhatsApp()
+    } else {
+      // 3ª vez em diante: exige Turnstile
+      setTurnstileOpen(true)
+    }
+  }
+  
+  const handleTurnstileSuccess = (_token) => {
+    setTurnstileOpen(false)
+    doSendWhatsApp()
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 lg:pb-0">
       <AdminBar type="catalogo"
         onNewProduct={() => { setEditingProduct(null); setModalOpen(true) }}
         onSettings={() => setTaxonomyOpen(true)}
       />
 
+      {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b shadow-sm">
-        <div className="container flex items-center gap-4 h-16">
+
+        {/* Desktop: logo + busca centralizada + carrinho (layout original) */}
+        <div className="hidden lg:flex container items-center gap-4 h-16">
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <img src={psrLogo} alt="PSR Embalagens" className="h-9" />
           </Link>
@@ -202,13 +325,13 @@ const Catalogo = () => {
               className="w-full pl-10 pr-4 py-2 rounded-full border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-background text-sm transition-all" />
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
+            <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Voltar ao site
             </Link>
             <button onClick={() => setCartOpen(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-colors relative">
               <ShoppingBag className="w-5 h-5" />
-              <span className="text-sm font-medium hidden sm:block">Carrinho</span>
+              <span className="text-sm font-medium">Carrinho</span>
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                   {totalItems}
@@ -217,7 +340,47 @@ const Catalogo = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile: logo + carrinho */}
+        <div className="lg:hidden flex container items-center justify-between h-14">
+          <Link to="/"><img src={psrLogo} alt="PSR Embalagens" className="h-9" /></Link>
+          <button onClick={() => setCartOpen(true)} className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
+            <ShoppingBag className="w-5 h-5" />
+            {totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {totalItems > 9 ? "9+" : totalItems}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile: busca + botão filtros */}
+        <div className="lg:hidden px-4 pb-3 flex items-center gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input type="text" placeholder="Buscar produtos..." value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-full border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-background text-sm transition-all" />
+          </div>
+          <button onClick={() => setSidebarOpen(true)}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full border text-sm font-medium transition-all ${
+              activeFiltersCount > 0 ? "bg-primary text-white border-primary" : "border-border text-muted-foreground"
+            }`}>
+            <SlidersHorizontal className="w-4 h-4" />
+            {activeFiltersCount > 0 && <span>{activeFiltersCount}</span>}
+          </button>
+        </div>
       </header>
+
+      {/* Pills de setor — só mobile */}
+      <div className="lg:hidden py-3 border-b bg-background">
+        <MobileSetorPills
+          setores={setoresDisponiveis}
+          active={activeSetor}
+          onSelect={(slug) => { setActiveSetor(slug); setPagina(1) }}
+          onClear={() => { setActiveSetor(null); setPagina(1) }}
+        />
+      </div>
 
       <div className="container py-6">
         <div className="flex gap-6">
@@ -236,15 +399,12 @@ const Catalogo = () => {
                 </div>
                 <p className="text-xs text-muted-foreground">Refine sua busca</p>
               </div>
-
               <SidebarSection title="Setor" items={setoresDisponiveis} active={activeSetor}
                 onSelect={(slug) => { setActiveSetor(slug); setPagina(1) }}
                 onClear={() => { setActiveSetor(null); setPagina(1) }} />
-
               <SidebarSection title="Categoria" items={categoriasDisponiveis} active={activeCategoria}
                 onSelect={(slug) => { setActiveCategoria(slug); setPagina(1) }}
                 onClear={() => { setActiveCategoria(null); setPagina(1) }} />
-
               <SidebarSection title="Material" items={tiposDisponiveis} active={activeTipo}
                 onSelect={(slug) => { setActiveTipo(slug); setPagina(1) }}
                 onClear={() => { setActiveTipo(null); setPagina(1) }} />
@@ -253,47 +413,76 @@ const Catalogo = () => {
 
           {/* Conteúdo principal */}
           <div className="flex-1 min-w-0">
-            <div className="mb-6">
+            <div className="mb-4 lg:mb-6">
               <span className="text-xs font-semibold text-primary uppercase tracking-widest border border-primary/20 bg-primary/5 px-2 py-0.5 rounded">
                 Catálogo completo
               </span>
-              <h1 className="text-3xl font-bold text-foreground mt-2 mb-1">Explorar Catálogo</h1>
-              <p className="text-muted-foreground text-sm mb-4">
+              <h1 className="text-2xl lg:text-3xl font-bold text-foreground mt-2 mb-1">Explorar Catálogo</h1>
+              <p className="text-muted-foreground text-sm mb-3 hidden lg:block">
                 Encontre embalagens, descartáveis e produtos de limpeza para o seu negócio
               </p>
-              <div className="flex items-center justify-end">
-                <button onClick={() => setSidebarOpen(true)}
-                  className={`lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${activeFiltersCount > 0 ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}>
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  {activeFiltersCount > 0 ? `Filtros (${activeFiltersCount})` : "Filtrar"}
-                </button>
-              </div>
+              {!loading && (
+                <p className="text-sm text-muted-foreground">
+                  {filtered.length} produto{filtered.length !== 1 ? "s" : ""}
+                  {activeFiltersCount > 0 && (
+                    <button onClick={clearFilters} className="ml-2 text-primary hover:underline text-xs">limpar filtros</button>
+                  )}
+                </p>
+              )}
             </div>
 
-            {!loading && (
-              <p className="text-sm text-muted-foreground mb-4">
-                {filtered.length} produto{filtered.length !== 1 ? "s" : ""}
-                {activeFiltersCount > 0 && (
-                  <button onClick={clearFilters} className="ml-2 text-primary hover:underline text-xs">limpar filtros</button>
-                )}
-              </p>
-            )}
-
             {loading ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="bg-card rounded-2xl overflow-hidden animate-pulse">
-                    <div className="aspect-square bg-muted" />
-                    <div className="p-4 space-y-2">
-                      <div className="h-3 bg-muted rounded w-1/3" />
-                      <div className="h-4 bg-muted rounded w-2/3" />
+              <>
+                <div className="grid grid-cols-2 gap-3 lg:hidden">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-card rounded-2xl overflow-hidden animate-pulse border">
+                      <div className="aspect-square bg-muted" />
+                      <div className="p-3 space-y-2">
+                        <div className="h-4 bg-muted rounded w-3/4" />
+                        <div className="h-3 bg-muted rounded w-full" />
+                        <div className="h-8 bg-muted rounded-xl w-full mt-1" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                <div className="hidden lg:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="bg-card rounded-2xl overflow-hidden animate-pulse">
+                      <div className="aspect-square bg-muted" />
+                      <div className="p-4 space-y-2">
+                        <div className="h-3 bg-muted rounded w-1/3" />
+                        <div className="h-4 bg-muted rounded w-2/3" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {/* Mobile: grid 2 colunas */}
+                <div className="grid grid-cols-2 gap-3 lg:hidden">
+                  <AnimatePresence mode="popLayout">
+                    {produtosVisiveis.map((product, index) => {
+                      const inCart = cart.find((c) => c.id === product.id)
+                      return (
+                        <motion.div key={product.id} layout
+                          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.2, delay: index < POR_PAGINA ? (index % 6) * 0.03 : 0 }}>
+                          <MobileCard
+                            product={product} inCart={inCart}
+                            isAdmin={isAdmin}
+                            onEdit={(p) => { setEditingProduct(p); setModalOpen(true) }}
+                            onDelete={handleDelete}
+                          />
+                        </motion.div>
+                      )
+                    })}
+                  </AnimatePresence>
+                </div>
+
+                {/* Desktop: grid original */}
+                <div className="hidden lg:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   <AnimatePresence mode="popLayout">
                     {produtosVisiveis.map((product, index) => {
                       const inCart = cart.find((c) => c.id === product.id)
@@ -313,11 +502,6 @@ const Catalogo = () => {
                                   <ShoppingBag className="w-10 h-10" />
                                 </div>
                               )}
-                              {inCart && (
-                                <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow">
-                                  {inCart.qty}
-                                </div>
-                              )}
                             </div>
                             <div className="p-3.5">
                               {product.categoria && (
@@ -329,28 +513,12 @@ const Catalogo = () => {
                               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.descricao}</p>
                               <div className="mt-3 flex items-center justify-between">
                                 <span className="text-xs text-muted-foreground">{product.tipo?.nome}</span>
-                                {inCart ? (
-                                  <div className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
-                                    <button onClick={(e) => { e.preventDefault(); updateQty(product.id, -1) }}
-                                      className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80">
-                                      <Minus className="w-3 h-3" />
-                                    </button>
-                                    <span className="text-xs font-bold w-5 text-center">{inCart.qty}</span>
-                                    <button onClick={(e) => { e.preventDefault(); updateQty(product.id, 1) }}
-                                      className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90">
-                                      <Plus className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button onClick={(e) => addToCart(e, product)}
-                                    className="flex items-center gap-1 text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-medium hover:bg-primary/90 transition-colors">
-                                    <Plus className="w-3 h-3" /> Adicionar
-                                  </button>
-                                )}
+                                <span className="flex items-center gap-1 text-xs font-semibold text-[#1A50A0] group-hover:gap-2 transition-all">
+                                  Ver produto <ArrowRight className="w-3 h-3" />
+                                </span>
                               </div>
                             </div>
                           </Link>
-
                           {isAdmin && (
                             <div className="flex gap-2 mt-1.5 px-1">
                               <button onClick={() => { setEditingProduct(product); setModalOpen(true) }}
@@ -397,8 +565,8 @@ const Catalogo = () => {
         </div>
       </div>
 
-      {/* Helper flutuante */}
-      <div className="fixed bottom-6 right-6 z-40 flex items-end gap-2">
+      {/* Helper flutuante — só desktop */}
+      <div className="fixed bottom-6 right-6 z-40 hidden lg:flex items-end gap-2">
         <AnimatePresence>
           {showHelper && (
             <motion.div initial={{ opacity: 0, x: 10, scale: 0.9 }} animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -417,7 +585,10 @@ const Catalogo = () => {
         </button>
       </div>
 
-      {/* Sidebar mobile */}
+      {/* Navbar inferior — só mobile */}
+      <MobileBottomNav onCartOpen={() => setCartOpen(true)} />
+
+      {/* Sidebar filtros mobile */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -435,35 +606,40 @@ const Catalogo = () => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Setor</p>
-                  <div className="space-y-0.5">
-                    <button onClick={() => { setActiveSetor(null); setPagina(1) }}
-                      className={`w-full text-left px-2 py-2 rounded text-sm ${!activeSetor ? "text-primary font-semibold" : "text-muted-foreground"}`}>Todos</button>
-                    {setoresDisponiveis.map((s) => (
-                      <button key={s.slug} onClick={() => { setActiveSetor(s.slug); setPagina(1); setSidebarOpen(false) }}
-                        className={`w-full text-left px-2 py-2 rounded text-sm ${activeSetor === s.slug ? "text-primary font-semibold" : "text-muted-foreground"}`}>{s.nome}</button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Categoria</p>
-                  <div className="space-y-0.5">
+                  <p className="text-xs font-black uppercase tracking-widest text-gray-900 mb-3 px-1">Categoria</p>
+                  <div className="space-y-1">
                     <button onClick={() => { setActiveCategoria(null); setPagina(1) }}
-                      className={`w-full text-left px-2 py-2 rounded text-sm ${!activeCategoria ? "text-primary font-semibold" : "text-muted-foreground"}`}>Todas</button>
+                      className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        !activeCategoria
+                          ? "bg-[#1A50A0] text-white"
+                          : "text-gray-500 hover:bg-gray-50"
+                      }`}>Todas</button>
                     {categoriasDisponiveis.map((c) => (
                       <button key={c.slug} onClick={() => { setActiveCategoria(c.slug); setPagina(1); setSidebarOpen(false) }}
-                        className={`w-full text-left px-2 py-2 rounded text-sm ${activeCategoria === c.slug ? "text-primary font-semibold" : "text-muted-foreground"}`}>{c.nome}</button>
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                          activeCategoria === c.slug
+                            ? "bg-[#1A50A0] text-white"
+                            : "text-gray-500 hover:bg-gray-50"
+                        }`}>{c.nome}</button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Material</p>
-                  <div className="space-y-0.5">
+                  <p className="text-xs font-black uppercase tracking-widest text-gray-900 mb-3 px-1">Material</p>
+                  <div className="space-y-1">
                     <button onClick={() => { setActiveTipo(null); setPagina(1) }}
-                      className={`w-full text-left px-2 py-2 rounded text-sm ${!activeTipo ? "text-primary font-semibold" : "text-muted-foreground"}`}>Todos</button>
+                      className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        !activeTipo
+                          ? "bg-[#1A50A0] text-white"
+                          : "text-gray-500 hover:bg-gray-50"
+                      }`}>Todos</button>
                     {tiposDisponiveis.map((t) => (
                       <button key={t.slug} onClick={() => { setActiveTipo(t.slug); setPagina(1); setSidebarOpen(false) }}
-                        className={`w-full text-left px-2 py-2 rounded text-sm ${activeTipo === t.slug ? "text-primary font-semibold" : "text-muted-foreground"}`}>{t.nome}</button>
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                          activeTipo === t.slug
+                            ? "bg-[#1A50A0] text-white"
+                            : "text-gray-500 hover:bg-gray-50"
+                        }`}>{t.nome}</button>
                     ))}
                   </div>
                 </div>
@@ -485,13 +661,7 @@ const Catalogo = () => {
         )}
       </AnimatePresence>
 
-      {totalItems > 0 && !cartOpen && (
-        <motion.button initial={{ y: 100 }} animate={{ y: 0 }} onClick={() => setCartOpen(true)}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg flex items-center gap-2 font-semibold sm:hidden">
-          <ShoppingBag className="w-5 h-5" /> Lista ({totalItems})
-        </motion.button>
-      )}
-
+      {/* Carrinho */}
       <AnimatePresence>
         {cartOpen && (
           <>
@@ -556,11 +726,19 @@ const Catalogo = () => {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {turnstileOpen && (
+          <TurnstileModal
+            onSuccess={handleTurnstileSuccess}
+            onClose={() => setTurnstileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {isAdmin && modalOpen && (
         <ProductModal product={editingProduct} tipos={tipos} setores={setores} categorias={categorias}
           onClose={() => setModalOpen(false)} onSaved={handleSaved} />
       )}
-
       {isAdmin && taxonomyOpen && (
         <TaxonomyModal onClose={() => setTaxonomyOpen(false)} />
       )}

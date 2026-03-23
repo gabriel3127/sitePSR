@@ -9,10 +9,11 @@ import FaqSection from "@/components/FaqSection";
 import ConversionSection from "@/components/ConversionSection";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Footer from "@/components/Footer";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 lg:pb-0">
       <Navbar />
       <HeroSection />
       <SocialProof />
@@ -24,10 +25,9 @@ const Index = () => {
       <ConversionSection />
       <Footer />
       <WhatsAppButton />
+      <MobileBottomNav />
     </div>
   );
 };
 
 export default Index;
-
-

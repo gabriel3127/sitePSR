@@ -1,67 +1,34 @@
 import { useState } from "react"
-import { X, Upload, Plus, Trash2 } from "lucide-react"
+import { X, Upload, Plus, Trash2, GripVertical } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { convertToWebp } from "@/lib/convertToWebp"
 
 const VariacoesEditor = ({ variacoes, onChange }) => {
-  const addGrupo = () => {
-    onChange([...variacoes, { label: "", valores: [""] }])
-  }
-
-  const removeGrupo = (gi) => {
-    onChange(variacoes.filter((_, i) => i !== gi))
-  }
-
-  const updateLabel = (gi, val) => {
-    const next = variacoes.map((g, i) => i === gi ? { ...g, label: val } : g)
-    onChange(next)
-  }
-
-  const addValor = (gi) => {
-    const next = variacoes.map((g, i) => i === gi ? { ...g, valores: [...g.valores, ""] } : g)
-    onChange(next)
-  }
-
-  const removeValor = (gi, vi) => {
-    const next = variacoes.map((g, i) =>
-      i === gi ? { ...g, valores: g.valores.filter((_, j) => j !== vi) } : g
-    )
-    onChange(next)
-  }
-
-  const updateValor = (gi, vi, val) => {
-    const next = variacoes.map((g, i) =>
-      i === gi ? { ...g, valores: g.valores.map((v, j) => j === vi ? val : v) } : g
-    )
-    onChange(next)
-  }
+  const addGrupo = () => onChange([...variacoes, { label: "", valores: [""] }])
+  const removeGrupo = (gi) => onChange(variacoes.filter((_, i) => i !== gi))
+  const updateLabel = (gi, val) => onChange(variacoes.map((g, i) => i === gi ? { ...g, label: val } : g))
+  const addValor = (gi) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: [...g.valores, ""] } : g))
+  const removeValor = (gi, vi) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: g.valores.filter((_, j) => j !== vi) } : g))
+  const updateValor = (gi, vi, val) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: g.valores.map((v, j) => j === vi ? val : v) } : g))
 
   return (
     <div className="space-y-3">
       {variacoes.map((grupo, gi) => (
         <div key={gi} className="border rounded-lg p-3 space-y-2 bg-secondary/10">
           <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={grupo.label}
-              onChange={(e) => updateLabel(gi, e.target.value)}
+            <input type="text" value={grupo.label} onChange={(e) => updateLabel(gi, e.target.value)}
               placeholder="Nome do grupo (ex: Cor, Tamanho)"
-              className="flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <button onClick={() => removeGrupo(gi)}
-              className="p-1.5 rounded border border-destructive/30 text-destructive hover:bg-destructive/10">
+              className="flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            <button onClick={() => removeGrupo(gi)} className="p-1.5 rounded border border-destructive/30 text-destructive hover:bg-destructive/10">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
           <div className="space-y-1.5 pl-2">
             {grupo.valores.map((val, vi) => (
               <div key={vi} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={val}
-                  onChange={(e) => updateValor(gi, vi, e.target.value)}
+                <input type="text" value={val} onChange={(e) => updateValor(gi, vi, e.target.value)}
                   placeholder="ex: Vermelho, 500ml..."
-                  className="flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+                  className="flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                 <button onClick={() => removeValor(gi, vi)}
                   className="p-1.5 rounded border border-destructive/30 text-destructive hover:bg-destructive/10 disabled:opacity-30"
                   disabled={grupo.valores.length === 1}>
@@ -69,8 +36,7 @@ const VariacoesEditor = ({ variacoes, onChange }) => {
                 </button>
               </div>
             ))}
-            <button onClick={() => addValor(gi)}
-              className="flex items-center gap-1 text-xs text-primary hover:underline mt-1">
+            <button onClick={() => addValor(gi)} className="flex items-center gap-1 text-xs text-primary hover:underline mt-1">
               <Plus className="w-3 h-3" /> Adicionar opção
             </button>
           </div>
@@ -84,6 +50,119 @@ const VariacoesEditor = ({ variacoes, onChange }) => {
   )
 }
 
+// ─── Extrai o path do storage a partir da URL pública ────────────────────────
+const extractStoragePath = (url) => {
+  try {
+    const marker = "/storage/v1/object/public/produtos/"
+    const idx = url.indexOf(marker)
+    if (idx === -1) return null
+    return decodeURIComponent(url.slice(idx + marker.length))
+  } catch { return null }
+}
+
+// ─── Editor de fotos múltiplas ────────────────────────────────────────────────
+const FotosEditor = ({ fotos, onChange }) => {
+  const [uploading, setUploading] = useState(false)
+
+  const handleUpload = async (e) => {
+    const files = Array.from(e.target.files)
+    if (!files.length) return
+    setUploading(true)
+    const urls = []
+    for (const file of files) {
+      const webpFile = await convertToWebp(file)
+      const path = `produtos/${Date.now()}_${Math.random().toString(36).slice(2)}.webp`
+      const { error } = await supabase.storage.from("produtos").upload(path, webpFile, { contentType: "image/webp" })
+      if (!error) {
+        const { data } = supabase.storage.from("produtos").getPublicUrl(path)
+        urls.push(data.publicUrl)
+      }
+    }
+    onChange([...fotos, ...urls])
+    setUploading(false)
+    // limpa o input para permitir reenvio do mesmo arquivo
+    e.target.value = ""
+  }
+
+  const removePhoto = async (index) => {
+    const url = fotos[index]
+    const path = extractStoragePath(url)
+    if (path) await supabase.storage.from("produtos").remove([path])
+    onChange(fotos.filter((_, i) => i !== index))
+  }
+
+  // move foto para primeira posição (capa)
+  const setAsCover = (index) => {
+    if (index === 0) return
+    const next = [...fotos]
+    const [item] = next.splice(index, 1)
+    next.unshift(item)
+    onChange(next)
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* grid de fotos */}
+      {fotos.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          {fotos.map((url, i) => (
+            <div key={url + i} className="relative group rounded-lg overflow-hidden border aspect-square bg-muted">
+              <img src={url} alt={`foto ${i + 1}`} className="w-full h-full object-cover" />
+
+              {/* badge capa */}
+              {i === 0 && (
+                <span className="absolute top-1 left-1 bg-[#1A50A0] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                  Capa
+                </span>
+              )}
+
+              {/* ações no hover */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                {i !== 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setAsCover(i)}
+                    title="Definir como capa"
+                    className="bg-white text-gray-800 text-[10px] font-bold px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+                  >
+                    Capa
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removePhoto(i)}
+                  title="Remover foto"
+                  className="bg-red-500 text-white p-1.5 rounded hover:bg-red-600 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* botão de upload */}
+      <label className="flex items-center gap-2 cursor-pointer border border-dashed rounded-lg px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
+        <Upload className="w-4 h-4" />
+        {uploading ? "Enviando..." : fotos.length > 0 ? "Adicionar mais fotos" : "Escolher fotos"}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleUpload}
+          className="hidden"
+          disabled={uploading}
+        />
+      </label>
+      {fotos.length > 1 && (
+        <p className="text-xs text-muted-foreground">A primeira foto é usada como capa no catálogo. Passe o mouse para reordenar.</p>
+      )}
+    </div>
+  )
+}
+
+// ─── Modal principal ──────────────────────────────────────────────────────────
 const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved }) => {
   const editing = !!product
 
@@ -98,9 +177,7 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
 
   const [variacoes, setVariacoes] = useState(
     product?.variacoes
-      ? (typeof product.variacoes === "string"
-          ? JSON.parse(product.variacoes)
-          : product.variacoes)
+      ? (typeof product.variacoes === "string" ? JSON.parse(product.variacoes) : product.variacoes)
       : []
   )
 
@@ -108,27 +185,18 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
     product?.produto_setores?.map((ps) => ps.setor?.id).filter(Boolean) || []
   )
 
-  const [uploading, setUploading] = useState(false)
+  // inicializa fotos: prioriza array fotos, senão usa foto_url legado
+  const [fotos, setFotos] = useState(() => {
+    if (product?.fotos?.length) return product.fotos
+    if (product?.foto_url) return [product.foto_url]
+    return []
+  })
+
   const [saving, setSaving] = useState(false)
-  const [fotoUrl, setFotoUrl] = useState(product?.foto_url || null)
   const [error, setError] = useState("")
 
   const toggleSetor = (id) =>
     setSelectedSetores((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id])
-
-  const handleUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploading(true)
-    const ext = file.name.split(".").pop()
-    const path = `produtos/${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from("produtos").upload(path, file)
-    if (!error) {
-      const { data } = supabase.storage.from("produtos").getPublicUrl(path)
-      setFotoUrl(data.publicUrl)
-    }
-    setUploading(false)
-  }
 
   const handleSave = async () => {
     if (!form.nome.trim()) { setError("Nome obrigatório."); return }
@@ -140,11 +208,13 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
       .map(g => ({ label: g.label.trim(), valores: g.valores.filter(v => v.trim()) }))
 
     const payload = {
-        ...form,
-        foto_url: fotoUrl,
-        variacoes: variacoesLimpas,
-        tipo_id: form.tipo_id === "" ? null : Number(form.tipo_id),
-        categoria_id: form.categoria_id === "" ? null : Number(form.categoria_id),
+      ...form,
+      // mantém foto_url como a primeira foto para compatibilidade com Produto.jsx e Catalogo.jsx
+      foto_url: fotos[0] || null,
+      fotos,
+      variacoes: variacoesLimpas,
+      tipo_id: form.tipo_id === "" ? null : Number(form.tipo_id),
+      categoria_id: form.categoria_id === "" ? null : Number(form.categoria_id),
     }
 
     let produtoId = product?.id
@@ -182,6 +252,7 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
         </div>
 
         <div className="p-5 space-y-4">
+          {/* Nome */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Nome</label>
             <input type="text" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })}
@@ -189,6 +260,7 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
               placeholder="ex: Marmita de alumínio 500ml" />
           </div>
 
+          {/* Descrição */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Descrição</label>
             <textarea rows={3} value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })}
@@ -196,6 +268,7 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
               placeholder="Descrição breve do produto" />
           </div>
 
+          {/* Tipo + Categoria */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">Tipo (material)</label>
@@ -215,6 +288,7 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
             </div>
           </div>
 
+          {/* Setores */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Setores de atuação</label>
             <div className="flex flex-wrap gap-2">
@@ -229,11 +303,13 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
             </div>
           </div>
 
+          {/* Variações */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Variações</label>
             <VariacoesEditor variacoes={variacoes} onChange={setVariacoes} />
           </div>
 
+          {/* Observação */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Observação</label>
             <input type="text" value={form.obs} onChange={(e) => setForm({ ...form, obs: e.target.value })}
@@ -241,16 +317,15 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
               placeholder="ex: Disponível com ou sem tampa" />
           </div>
 
+          {/* Fotos */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Foto</label>
-            {fotoUrl && <img src={fotoUrl} alt="preview" className="w-full aspect-square object-cover rounded-lg border" />}
-            <label className="flex items-center gap-2 cursor-pointer border border-dashed rounded-lg px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
-              <Upload className="w-4 h-4" />
-              {uploading ? "Enviando..." : fotoUrl ? "Trocar foto" : "Escolher foto"}
-              <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
+            <label className="text-sm font-medium text-foreground">
+              Fotos {fotos.length > 0 && <span className="text-muted-foreground font-normal">({fotos.length})</span>}
             </label>
+            <FotosEditor fotos={fotos} onChange={setFotos} />
           </div>
 
+          {/* Visível */}
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.ativo} onChange={(e) => setForm({ ...form, ativo: e.target.checked })} className="rounded" />
             <span className="text-sm text-foreground">Produto visível no catálogo</span>

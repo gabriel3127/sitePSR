@@ -48,8 +48,6 @@ export function useProducts() {
           produto_setores: (setoresPorProduto[p.id] || []).map(s => ({ setor: s })),
         }))
 
-        console.log("produtos:", prodsEnriquecidos.length, prodsEnriquecidos[0])
-
         setProducts(prodsEnriquecidos)
         setTipos(tip || [])
         setSetores(set || [])
@@ -78,11 +76,13 @@ export function useProduct(id) {
           { data: p, error: e1 },
           { data: tip },
           { data: cat },
+          { data: set },
           { data: ps },
         ] = await Promise.all([
           supabase.from("produtos").select("*").eq("id", id).single(),
           supabase.from("tipos").select("*"),
           supabase.from("categorias").select("*"),
+          supabase.from("setores").select("*"),                              // ← busca setores completos
           supabase.from("produto_setores").select("setor_id").eq("produto_id", id),
         ])
 
@@ -90,12 +90,14 @@ export function useProduct(id) {
 
         const tiposMap = Object.fromEntries((tip || []).map(t => [t.id, t]))
         const catMap = Object.fromEntries((cat || []).map(c => [c.id, c]))
+        const setoresMap = Object.fromEntries((set || []).map(s => [s.id, s]))  // ← mapa completo
 
         setProduct({
           ...p,
           tipo: tiposMap[p.tipo_id] || null,
           categoria: catMap[p.categoria_id] || null,
-          produto_setores: (ps || []).map(s => ({ setor: { id: s.setor_id } })),
+          // setor completo com id, slug e nome — necessário para os relacionados
+          produto_setores: (ps || []).map(s => ({ setor: setoresMap[s.setor_id] || { id: s.setor_id } })),
         })
       } catch (err) {
         console.error("fetchOne error:", err)

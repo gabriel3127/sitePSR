@@ -7,6 +7,7 @@ import { usePosts, usePost } from "@/hooks/usePosts"
 import { useAuth } from "@/contexts/AuthContext"
 import AdminBar from "@/components/AdminBar"
 import PostModal from "@/components/PostModal"
+import MobileBottomNav from "@/components/MobileBottomNav"
 import { supabase } from "@/lib/supabase"
 
 // ─── Cores por categoria ────────────────────────────────────────────────────
@@ -37,6 +38,8 @@ const BlogNav = () => (
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
         <Link to="/" className="hover:text-[#1A50A0] transition-colors">Home</Link>
         <Link to="/depoimentos" className="hover:text-[#1A50A0] transition-colors">Depoimentos</Link>
+        <Link to="/#sobre" className="hover:text-[#1A50A0] transition-colors">Sobre</Link>
+        <Link to="/#contato" className="hover:text-[#1A50A0] transition-colors">Contato</Link>
       </nav>
 
       <Link
@@ -387,7 +390,7 @@ const Blog = () => {
   const rest = filtered.filter((p) => !p.destaque || p !== featured)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
       <AdminBar
         type="blog"
         onNewPost={() => { setEditingPost(null); setModalOpen(true) }}
@@ -454,6 +457,8 @@ const Blog = () => {
           onSaved={handleSaved}
         />
       )}
+
+      <MobileBottomNav />
     </div>
   )
 }

@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom"
 import { Star, ExternalLink, ArrowRight, Sparkles } from "lucide-react"
 import psrLogo from "@/assets/psr-logo.svg"
+import MobileBottomNav from "@/components/MobileBottomNav"
 
 const reviews = [
   { name: "Carlos Mendes", business: "Hamburgueria Artesanal", setor: "Alimentação", rating: 5, text: "A PSR Embalagens é nossa parceira há mais de 2 anos. As caixas kraft para nossos hambúrgueres são de excelente qualidade e o preço é justo. Entrega sempre no prazo!", avatar: "CM" },
@@ -32,6 +33,8 @@ const Nav = () => (
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
         <Link to="/" className="hover:text-[#1A50A0] transition-colors">Home</Link>
         <Link to="/blog" className="hover:text-[#1A50A0] transition-colors">Blog</Link>
+        <Link to="/#sobre" className="hover:text-[#1A50A0] transition-colors">Sobre</Link>
+        <Link to="/#contato" className="hover:text-[#1A50A0] transition-colors">Contato</Link>
       </nav>
       <Link
         to="/catalogo"
@@ -139,7 +142,7 @@ const Footer = () => (
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const Depoimentos = () => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
     <Nav />
     <Hero />
 
@@ -152,6 +155,8 @@ const Depoimentos = () => (
 
       <Footer />
     </div>
+
+    <MobileBottomNav />
   </div>
 )
 

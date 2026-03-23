@@ -1,9 +1,10 @@
 import { useState } from "react"
-import { X, Upload, Star } from "lucide-react"
+import { X, Upload } from "lucide-react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
 import { supabase } from "@/lib/supabase"
+import { convertToWebp } from "@/lib/convertToWebp"
 
 const MenuBar = ({ editor }) => {
   if (!editor) return null
@@ -72,9 +73,9 @@ const PostModal = ({ post, onClose, onSaved }) => {
     const file = e.target.files[0]
     if (!file) return
     setUploading(true)
-    const ext = file.name.split(".").pop()
-    const path = `blog/${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from("produtos").upload(path, file)
+    const webpFile = await convertToWebp(file)
+    const path = `blog/${Date.now()}.webp`
+    const { error } = await supabase.storage.from("produtos").upload(path, webpFile, { contentType: "image/webp" })
     if (!error) {
       const { data } = supabase.storage.from("produtos").getPublicUrl(path)
       setFotoUrl(data.publicUrl)
