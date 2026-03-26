@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useParams, Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingBag, Plus, Minus, ChevronRight, Check, Trash2, ArrowRight, X, ZoomIn } from "lucide-react"
@@ -14,62 +14,26 @@ const saveCart = (cart) => localStorage.setItem(CART_KEY, JSON.stringify(cart))
 // ─── Lightbox ─────────────────────────────────────────────────────────────────
 const Lightbox = ({ images, startIndex, onClose }) => {
   const [current, setCurrent] = useState(startIndex)
-
-  const prev = () => setCurrent((i) => (i - 1 + images.length) % images.length)
-  const next = () => setCurrent((i) => (i + 1) % images.length)
-
+  const prev = () => setCurrent(i => (i - 1 + images.length) % images.length)
+  const next = () => setCurrent(i => (i + 1) % images.length)
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
-        {/* fechar */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
-        >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={onClose}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors">
           <X className="w-6 h-6" />
         </button>
-
-        {/* imagem */}
-        <motion.img
-          key={current}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          src={images[current]}
-          alt=""
-          className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
-          onClick={(e) => e.stopPropagation()}
-        />
-
-        {/* navegação entre fotos */}
+        <motion.img key={current} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.2 }}
+          src={images[current]} alt="" className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+          onClick={e => e.stopPropagation()} />
         {images.length > 1 && (
           <>
-            <button
-              onClick={(e) => { e.stopPropagation(); prev() }}
-              className="absolute left-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
-            >
-              ‹
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); next() }}
-              className="absolute right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
-            >
-              ›
-            </button>
-            {/* indicadores */}
+            <button onClick={e => { e.stopPropagation(); prev() }} className="absolute left-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3">‹</button>
+            <button onClick={e => { e.stopPropagation(); next() }} className="absolute right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3">›</button>
             <div className="absolute bottom-4 flex gap-2">
               {images.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={(e) => { e.stopPropagation(); setCurrent(i) }}
-                  className={`w-2 h-2 rounded-full transition-colors ${i === current ? "bg-white" : "bg-white/40"}`}
-                />
+                <button key={i} onClick={e => { e.stopPropagation(); setCurrent(i) }}
+                  className={`w-2 h-2 rounded-full transition-colors ${i === current ? "bg-white" : "bg-white/40"}`} />
               ))}
             </div>
           </>
@@ -79,87 +43,42 @@ const Lightbox = ({ images, startIndex, onClose }) => {
   )
 }
 
-// ─── Card de produto relacionado ─────────────────────────────────────────────
+// ─── Produtos relacionados ────────────────────────────────────────────────────
 const RelatedCard = ({ product }) => (
-  <Link
-    to={`/catalogo/${product.id}`}
-    className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300"
-  >
+  <Link to={`/catalogo/${product.id}`}
+    className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300">
     <div className="aspect-square overflow-hidden bg-gray-50">
-      {product.foto_url ? (
-        <img
-          src={product.foto_url}
-          alt={product.nome}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center text-gray-300">
-          <ShoppingBag className="w-8 h-8" />
-        </div>
-      )}
+      {product.foto_url
+        ? <img src={product.foto_url} alt={product.nome} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        : <div className="w-full h-full flex items-center justify-center text-gray-300"><ShoppingBag className="w-8 h-8" /></div>}
     </div>
     <div className="p-3">
-      {product.categoria && (
-        <span className="text-xs font-semibold text-[#1A50A0] uppercase tracking-wide">
-          {product.categoria.nome}
-        </span>
-      )}
-      <h3 className="font-semibold text-gray-900 text-sm mt-0.5 leading-snug line-clamp-2 group-hover:text-[#1A50A0] transition-colors">
-        {product.nome}
-      </h3>
-      {product.tipo && (
-        <p className="text-xs text-gray-400 mt-1">{product.tipo.nome}</p>
-      )}
+      {product.categoria && <span className="text-xs font-semibold text-[#1A50A0] uppercase tracking-wide">{product.categoria.nome}</span>}
+      <h3 className="font-semibold text-gray-900 text-sm mt-0.5 leading-snug line-clamp-2 group-hover:text-[#1A50A0] transition-colors">{product.nome}</h3>
     </div>
   </Link>
 )
 
-// ─── Seção de relacionados ────────────────────────────────────────────────────
 const RelatedProducts = ({ currentProduct, allProducts }) => {
-  // pega os setores do produto atual
-  const setorSlugs = currentProduct.produto_setores?.map((ps) => ps.setor?.slug).filter(Boolean) || []
-
-  if (setorSlugs.length === 0) return null
-
-  // filtra por mesmo setor, exclui o produto atual, limita a 4
-  const related = allProducts
-    .filter((p) =>
-      p.id !== currentProduct.id &&
-      p.produto_setores?.some((ps) => setorSlugs.includes(ps.setor?.slug))
-    )
-    .slice(0, 4)
-
-  if (related.length === 0) return null
-
-  // nome do primeiro setor para exibir no título
+  const setorSlugs = currentProduct.produto_setores?.map(ps => ps.setor?.slug).filter(Boolean) || []
+  if (!setorSlugs.length) return null
+  const related = allProducts.filter(p => p.id !== currentProduct.id && p.produto_setores?.some(ps => setorSlugs.includes(ps.setor?.slug))).slice(0, 4)
+  if (!related.length) return null
   const setorNome = currentProduct.produto_setores?.[0]?.setor?.nome
-
   return (
     <section className="mt-16 border-t pt-12">
       <div className="flex items-end justify-between mb-6">
         <div>
           <h2 className="text-xl font-black text-gray-900">Produtos Relacionados</h2>
-          <p className="text-sm text-gray-400 mt-1">
-            Complete o seu estoque com estes itens
-            {setorNome && <span className="text-[#1A50A0] font-medium"> · {setorNome}</span>}
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Complete o seu estoque{setorNome && <span className="text-[#1A50A0] font-medium"> · {setorNome}</span>}</p>
         </div>
-        <Link
-          to="/catalogo"
-          className="hidden sm:flex items-center gap-1 text-sm font-semibold text-[#1A50A0] hover:gap-2 transition-all"
-        >
+        <Link to="/catalogo" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-[#1A50A0] hover:gap-2 transition-all">
           Ver todos <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
-
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {related.map((p, i) => (
-          <motion.div
-            key={p.id}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07 }}
-          >
+          <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
             <RelatedCard product={p} />
           </motion.div>
         ))}
@@ -167,6 +86,122 @@ const RelatedProducts = ({ currentProduct, allProducts }) => {
     </section>
   )
 }
+
+// ─── Parser de variações (novo formato e legado) ──────────────────────────────
+const parseVariacoes = (raw) => {
+  if (!raw) return { grupos: [], combinacoes: null }
+  const data = typeof raw === "string" ? JSON.parse(raw) : raw
+  if (Array.isArray(data)) return { grupos: data, combinacoes: null }
+  return { grupos: data.grupos || [], combinacoes: data.combinacoes ?? null }
+}
+
+// ─── Hook de combinações ──────────────────────────────────────────────────────
+const useCombinacoes = (grupos, combinacoes) => {
+  const comboSet = useMemo(() => {
+    if (combinacoes === null) return null
+    return new Set(combinacoes.map(c => c.join("|||")))
+  }, [combinacoes])
+
+  const isValidCombo = (selecoes) => {
+    if (comboSet === null) return true
+    const vals = grupos.map(g => selecoes[g.label] || null)
+    if (vals.some(v => v === null)) return true // parcial — não bloqueia
+    return comboSet.has(vals.join("|||"))
+  }
+
+  const isValueAvailable = (grupoLabel, valor, selecoes) => {
+    if (comboSet === null) return true
+    const gi = grupos.findIndex(g => g.label === grupoLabel)
+    const testSel = { ...selecoes, [grupoLabel]: valor }
+    // verifica se existe ao menos uma combinação completa válida com esse valor
+    const check = (gIdx, partial) => {
+      if (gIdx === grupos.length) return comboSet.has(partial.join("|||"))
+      const g = grupos[gIdx]
+      const fixed = testSel[g.label]
+      const candidates = fixed ? [fixed] : g.valores
+      return candidates.some(v => check(gIdx + 1, [...partial, v]))
+    }
+    return check(0, [])
+  }
+
+  return { isValidCombo, isValueAvailable }
+}
+
+// ─── Seletores inteligentes (novo formato) ────────────────────────────────────
+const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
+  const { isValueAvailable } = useCombinacoes(grupos, combinacoes)
+
+  return (
+    <div className="mt-6 space-y-5">
+      <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">Selecione as variações desejadas</p>
+      {grupos.map(g => (
+        <div key={g.label}>
+          <p className="text-xs font-bold text-[#1A50A0] mb-2">{g.label}</p>
+          <div className="flex flex-wrap gap-2">
+            {g.valores.map(val => {
+              const available = isValueAvailable(g.label, val, selecoes)
+              const selected = selecoes[g.label] === val
+              return (
+                <button
+                  key={val}
+                  onClick={() => available && onSelect(g.label, val)}
+                  disabled={!available}
+                  className={`px-3 py-2 rounded-xl border text-sm font-medium transition-all ${
+                    selected
+                      ? "bg-[#1A50A0] text-white border-[#1A50A0]"
+                      : available
+                        ? "border-gray-200 bg-white text-gray-900 hover:border-[#1A50A0]/50"
+                        : "border-gray-100 bg-gray-50 text-gray-300 line-through cursor-not-allowed"
+                  }`}
+                >
+                  {val}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Seletores legados (formato antigo com +/-) ───────────────────────────────
+const SeletoresLegados = ({ variacoes, selecoes, onUpdate }) => (
+  <div className="mt-6 space-y-6">
+    <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">Selecione as variações desejadas</p>
+    {variacoes.map(v => (
+      <div key={v.label}>
+        <p className="text-xs font-bold text-[#1A50A0] mb-2">{v.label}</p>
+        <div className="space-y-2">
+          {v.valores.map(val => {
+            const key = `${v.label}__${val}`
+            const qty = selecoes[key] || 0
+            return (
+              <div key={val} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border transition-colors ${qty > 0 ? "border-[#1A50A0] bg-[#1A50A0]/5" : "border-gray-200 bg-white"}`}>
+                <span className="text-sm font-medium text-gray-900">{val}</span>
+                <div className="flex items-center gap-2">
+                  {qty > 0 && (
+                    <>
+                      <button onClick={() => onUpdate(v.label, val, -1)}
+                        className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                        {qty === 1 ? <Trash2 className="w-3 h-3 text-gray-500" /> : <Minus className="w-3 h-3" />}
+                      </button>
+                      <span className="text-sm font-bold w-5 text-center">{qty}</span>
+                    </>
+                  )}
+                  <button onClick={() => onUpdate(v.label, val, 1)}
+                    className="w-7 h-7 rounded-lg bg-[#1A50A0] text-white flex items-center justify-center hover:bg-[#153f80] transition-colors">
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    ))}
+  </div>
+)
 
 // ─── Página do produto ────────────────────────────────────────────────────────
 const Produto = () => {
@@ -177,79 +212,70 @@ const Produto = () => {
   const [activeImg, setActiveImg] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [added, setAdded] = useState(false)
-  const [selecoes, setSelecoes] = useState({})
 
-  const updateSelecao = (label, valor, delta) => {
+  // estado para novo formato (seleção única por grupo)
+  const [selecaoNova, setSelecaoNova] = useState({})
+  // estado para formato legado (quantidade por opção)
+  const [selecaoLegada, setSelecaoLegada] = useState({})
+
+  const updateSelecaoLegada = (label, valor, delta) => {
     const key = `${label}__${valor}`
-    setSelecoes((prev) => {
+    setSelecaoLegada(prev => {
       const next = Math.max(0, (prev[key] || 0) + delta)
       if (next === 0) { const { [key]: _, ...rest } = prev; return rest }
       return { ...prev, [key]: next }
     })
   }
 
-  const totalSelecionado = Object.values(selecoes).reduce((sum, qty) => sum + qty, 0)
-
   const handleAddToCart = () => {
     if (!product) return
-    if (variacoes.length > 0 && totalSelecionado === 0) return
-
     const cart = getCart()
 
-    if (variacoes.length === 0) {
-      const existing = cart.find((item) => item.id === product.id)
-      let newCart
-      if (existing) {
-        newCart = cart.map((item) =>
-          item.id === product.id ? { ...item, qty: (item.qty || 0) + 1 } : item
-        )
-      } else {
-        newCart = [...cart, {
-          id: product.id,
-          nome: product.nome,
-          tipo: product.tipo?.nome,
-          foto_url: product.foto_url,
-          qty: 1
-        }]
-      }
+    if (isNovoFormato) {
+      // novo formato — 1 item por combinação selecionada
+      const todosGruposSelecionados = grupos.every(g => selecaoNova[g.label])
+      if (grupos.length > 0 && !todosGruposSelecionados) return
+
+      const descricaoCombo = grupos.map(g => `${g.label}: ${selecaoNova[g.label]}`).join(" / ")
+      const nomeCompleto = grupos.length > 0 ? `${product.nome} — ${descricaoCombo}` : product.nome
+      const itemKey = `${product.id}_${JSON.stringify(selecaoNova)}`
+      const existing = cart.find(i => i.id === itemKey)
+      const newCart = existing
+        ? cart.map(i => i.id === itemKey ? { ...i, qty: i.qty + 1 } : i)
+        : [...cart, { id: itemKey, nome: nomeCompleto, tipo: product.tipo?.nome, foto_url: product.foto_url, qty: 1 }]
       saveCart(newCart)
     } else {
-      const itensParaAdicionar = Object.entries(selecoes)
-        .filter(([, qty]) => qty > 0)
-        .map(([key, qty]) => {
-          const [label, valor] = key.split("__")
-          const nomeCompleto = `${product.nome} — ${valor}`
-          return {
-            id: `${product.id}_${key}`,
-            nome: nomeCompleto,
-            tipo: product.tipo?.nome,
-            foto_url: product.foto_url,
-            qty
-          }
-        })
+      // formato legado
+      const totalSelecionado = Object.values(selecaoLegada).reduce((s, q) => s + q, 0)
+      if (variacoesLegadas.length > 0 && totalSelecionado === 0) return
 
-      let newCart = [...cart]
-      itensParaAdicionar.forEach((novo) => {
-        const existing = newCart.find((item) => item.id === novo.id)
-        if (existing) {
-          newCart = newCart.map((item) =>
-            item.id === novo.id ? { ...item, qty: item.qty + novo.qty } : item
-          )
-        } else {
-          newCart.push(novo)
-        }
-      })
-      saveCart(newCart)
+      if (variacoesLegadas.length === 0) {
+        const existing = cart.find(i => i.id === product.id)
+        saveCart(existing
+          ? cart.map(i => i.id === product.id ? { ...i, qty: (i.qty || 0) + 1 } : i)
+          : [...cart, { id: product.id, nome: product.nome, tipo: product.tipo?.nome, foto_url: product.foto_url, qty: 1 }])
+      } else {
+        let newCart = [...cart]
+        Object.entries(selecaoLegada).filter(([, qty]) => qty > 0).forEach(([key, qty]) => {
+          const [label, valor] = key.split("__")
+          const itemId = `${product.id}_${key}`
+          const existing = newCart.find(i => i.id === itemId)
+          if (existing) newCart = newCart.map(i => i.id === itemId ? { ...i, qty: i.qty + qty } : i)
+          else newCart.push({ id: itemId, nome: `${product.nome} — ${valor}`, tipo: product.tipo?.nome, foto_url: product.foto_url, qty })
+        })
+        saveCart(newCart)
+      }
     }
 
     setAdded(true)
-    setSelecoes({})
+    setSelecaoNova({})
+    setSelecaoLegada({})
     setTimeout(() => setAdded(false), 2500)
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
         <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b">
           <div className="container flex items-center justify-between h-16">
             <Link to="/"><img src={psrLogo} alt="PSR Embalagens" className="h-10" /></Link>
@@ -258,13 +284,10 @@ const Produto = () => {
         <div className="container py-8 max-w-5xl">
           <div className="grid md:grid-cols-2 gap-10 animate-pulse">
             <div className="aspect-square bg-gray-200 rounded-2xl" />
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-1/4" />
-              <div className="h-8 bg-gray-200 rounded w-3/4" />
-              <div className="h-4 bg-gray-200 rounded w-full" />
-            </div>
+            <div className="space-y-4"><div className="h-4 bg-gray-200 rounded w-1/4" /><div className="h-8 bg-gray-200 rounded w-3/4" /></div>
           </div>
         </div>
+        <MobileBottomNav />
       </div>
     )
   }
@@ -278,9 +301,16 @@ const Produto = () => {
     )
   }
 
-  // usa array fotos se existir, senão usa foto_url legado
   const imagens = (product.fotos?.length ? product.fotos : [product.foto_url]).filter(Boolean)
-  const variacoes = product.variacoes || []
+  const { grupos, combinacoes } = parseVariacoes(product.variacoes)
+  const isNovoFormato = grupos.length >= 2 || (grupos.length > 0 && combinacoes !== null)
+  const variacoesLegadas = isNovoFormato ? [] : (Array.isArray(product.variacoes) ? product.variacoes : [])
+
+  const todosGruposSelecionados = grupos.length === 0 || grupos.every(g => selecaoNova[g.label])
+  const totalLegado = Object.values(selecaoLegada).reduce((s, q) => s + q, 0)
+  const podeAdicionar = isNovoFormato
+    ? (grupos.length === 0 || todosGruposSelecionados)
+    : (variacoesLegadas.length === 0 || totalLegado > 0)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
@@ -294,7 +324,6 @@ const Produto = () => {
       </header>
 
       <div className="container py-8 max-w-5xl">
-        {/* breadcrumb */}
         <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-8">
           <Link to="/" className="hover:text-gray-700 transition-colors">Início</Link>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -306,16 +335,11 @@ const Produto = () => {
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
           {/* galeria */}
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
-            <div
-              className="rounded-2xl overflow-hidden bg-white border aspect-square shadow-sm relative group cursor-zoom-in"
-              onClick={() => imagens.length > 0 && setLightboxOpen(true)}
-            >
-              {imagens[activeImg] ? (
-                <img src={imagens[activeImg]} alt={product.nome} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">sem foto</div>
-              )}
-              {/* ícone lupa */}
+            <div className="rounded-2xl overflow-hidden bg-white border aspect-square shadow-sm relative group cursor-zoom-in"
+              onClick={() => imagens.length > 0 && setLightboxOpen(true)}>
+              {imagens[activeImg]
+                ? <img src={imagens[activeImg]} alt={product.nome} className="w-full h-full object-cover" />
+                : <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">sem foto</div>}
               {imagens.length > 0 && (
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-2.5 shadow">
@@ -346,41 +370,21 @@ const Produto = () => {
             <h1 className="text-3xl font-black text-gray-900 leading-tight">{product.nome}</h1>
             <p className="mt-3 text-gray-500 leading-relaxed">{product.descricao}</p>
 
-            {variacoes.length > 0 && (
-              <div className="mt-6 space-y-6">
-                <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">Selecione as variações desejadas</p>
-                {variacoes.map((v) => (
-                  <div key={v.label}>
-                    <p className="text-xs font-bold text-[#1A50A0] mb-2">{v.label}</p>
-                    <div className="space-y-2">
-                      {v.valores.map((val) => {
-                        const key = `${v.label}__${val}`
-                        const qty = selecoes[key] || 0
-                        return (
-                          <div key={val} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border transition-colors ${qty > 0 ? "border-[#1A50A0] bg-[#1A50A0]/5" : "border-gray-200 bg-white"}`}>
-                            <span className="text-sm font-medium text-gray-900">{val}</span>
-                            <div className="flex items-center gap-2">
-                              {qty > 0 && (
-                                <>
-                                  <button onClick={() => updateSelecao(v.label, val, -1)}
-                                    className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                    {qty === 1 ? <Trash2 className="w-3 h-3 text-gray-500" /> : <Minus className="w-3 h-3" />}
-                                  </button>
-                                  <span className="text-sm font-bold w-5 text-center">{qty}</span>
-                                </>
-                              )}
-                              <button onClick={() => updateSelecao(v.label, val, 1)}
-                                className="w-7 h-7 rounded-lg bg-[#1A50A0] text-white flex items-center justify-center hover:bg-[#153f80] transition-colors">
-                                <Plus className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* seletores */}
+            {isNovoFormato && grupos.length > 0 && (
+              <SeletoresInteligentes
+                grupos={grupos}
+                combinacoes={combinacoes}
+                selecoes={selecaoNova}
+                onSelect={(label, val) => setSelecaoNova(prev => ({
+                  ...prev,
+                  [label]: prev[label] === val ? undefined : val
+                }))}
+              />
+            )}
+
+            {!isNovoFormato && variacoesLegadas.length > 0 && (
+              <SeletoresLegados variacoes={variacoesLegadas} selecoes={selecaoLegada} onUpdate={updateSelecaoLegada} />
             )}
 
             {product.obs && (
@@ -391,11 +395,24 @@ const Produto = () => {
               </div>
             )}
 
-            {totalSelecionado > 0 && (
+            {/* resumo seleção nova */}
+            {isNovoFormato && todosGruposSelecionados && grupos.length > 0 && (
               <div className="mt-4 bg-[#1A50A0]/5 border border-[#1A50A0]/20 rounded-xl px-4 py-3">
                 <p className="text-xs font-bold text-[#1A50A0] mb-1">Selecionado:</p>
                 <ul className="space-y-0.5">
-                  {Object.entries(selecoes).map(([key, qty]) => {
+                  {grupos.map(g => (
+                    <li key={g.label} className="text-xs text-gray-700">— {g.label}: {selecaoNova[g.label]}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* resumo seleção legada */}
+            {!isNovoFormato && totalLegado > 0 && (
+              <div className="mt-4 bg-[#1A50A0]/5 border border-[#1A50A0]/20 rounded-xl px-4 py-3">
+                <p className="text-xs font-bold text-[#1A50A0] mb-1">Selecionado:</p>
+                <ul className="space-y-0.5">
+                  {Object.entries(selecaoLegada).map(([key, qty]) => {
                     const [label, valor] = key.split("__")
                     return <li key={key} className="text-xs text-gray-700">— {label}: {valor} × {qty}</li>
                   })}
@@ -404,15 +421,14 @@ const Produto = () => {
             )}
 
             <div className="mt-6">
-              <Button onClick={handleAddToCart} size="lg"
-                disabled={variacoes.length > 0 && totalSelecionado === 0}
+              <Button onClick={handleAddToCart} size="lg" disabled={!podeAdicionar}
                 className={`w-full gap-2 rounded-xl transition-all ${added ? "bg-green-600 hover:bg-green-600" : "bg-[#1A50A0] hover:bg-[#153F80]"}`}>
                 {added ? (
                   <><Check className="w-4 h-4" /> Adicionado à lista!</>
-                ) : variacoes.length > 0 && totalSelecionado === 0 ? (
-                  <><ShoppingBag className="w-4 h-4" /> Selecione uma variação</>
+                ) : !podeAdicionar ? (
+                  <><ShoppingBag className="w-4 h-4" /> Selecione as variações</>
                 ) : (
-                  <><ShoppingBag className="w-4 h-4" /> Adicionar à lista{totalSelecionado > 0 ? ` (${totalSelecionado} ${totalSelecionado === 1 ? "item" : "itens"})` : ""}</>
+                  <><ShoppingBag className="w-4 h-4" /> Adicionar à lista</>
                 )}
               </Button>
               <p className="mt-2 text-xs text-gray-400 text-center">Finalize seu pedido pelo carrinho no catálogo</p>
@@ -420,19 +436,10 @@ const Produto = () => {
           </motion.div>
         </div>
 
-        {/* produtos relacionados */}
         <RelatedProducts currentProduct={product} allProducts={allProducts} />
       </div>
 
-      {/* lightbox */}
-      {lightboxOpen && (
-        <Lightbox
-          images={imagens}
-          startIndex={activeImg}
-          onClose={() => setLightboxOpen(false)}
-        />
-      )}
-
+      {lightboxOpen && <Lightbox images={imagens} startIndex={activeImg} onClose={() => setLightboxOpen(false)} />}
       <MobileBottomNav />
     </div>
   )
