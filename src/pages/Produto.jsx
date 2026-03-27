@@ -11,6 +11,11 @@ const CART_KEY = "psr_cart"
 const getCart = () => { try { return JSON.parse(localStorage.getItem(CART_KEY)) || [] } catch { return [] } }
 const saveCart = (cart) => localStorage.setItem(CART_KEY, JSON.stringify(cart))
 
+const getCatalogoUrl = () => {
+  const vSlug = sessionStorage.getItem("psr_vendedor_slug")
+  return vSlug ? `/catalogo?v=${vSlug}` : "/catalogo"
+}
+
 // ─── Lightbox ─────────────────────────────────────────────────────────────────
 const Lightbox = ({ images, startIndex, onClose }) => {
   const [current, setCurrent] = useState(startIndex)
@@ -62,7 +67,9 @@ const RelatedCard = ({ product }) => (
 const RelatedProducts = ({ currentProduct, allProducts }) => {
   const setorSlugs = currentProduct.produto_setores?.map(ps => ps.setor?.slug).filter(Boolean) || []
   if (!setorSlugs.length) return null
-  const related = allProducts.filter(p => p.id !== currentProduct.id && p.produto_setores?.some(ps => setorSlugs.includes(ps.setor?.slug))).slice(0, 4)
+  const related = allProducts
+    .filter(p => p.id !== currentProduct.id && p.produto_setores?.some(ps => setorSlugs.includes(ps.setor?.slug)))
+    .slice(0, 4)
   if (!related.length) return null
   const setorNome = currentProduct.produto_setores?.[0]?.setor?.nome
   return (
@@ -70,9 +77,11 @@ const RelatedProducts = ({ currentProduct, allProducts }) => {
       <div className="flex items-end justify-between mb-6">
         <div>
           <h2 className="text-xl font-black text-gray-900">Produtos Relacionados</h2>
-          <p className="text-sm text-gray-400 mt-1">Complete o seu estoque{setorNome && <span className="text-[#1A50A0] font-medium"> · {setorNome}</span>}</p>
+          <p className="text-sm text-gray-400 mt-1">
+            Complete o seu estoque{setorNome && <span className="text-[#1A50A0] font-medium"> · {setorNome}</span>}
+          </p>
         </div>
-        <Link to="/catalogo" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-[#1A50A0] hover:gap-2 transition-all">
+        <Link to={getCatalogoUrl()} className="hidden sm:flex items-center gap-1 text-sm font-semibold text-[#1A50A0] hover:gap-2 transition-all">
           Ver todos <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
@@ -87,7 +96,7 @@ const RelatedProducts = ({ currentProduct, allProducts }) => {
   )
 }
 
-// ─── Parser de variações (novo formato e legado) ──────────────────────────────
+// ─── Parser de variações ──────────────────────────────────────────────────────
 const parseVariacoes = (raw) => {
   if (!raw) return { grupos: [], combinacoes: null }
   const data = typeof raw === "string" ? JSON.parse(raw) : raw
@@ -102,18 +111,9 @@ const useCombinacoes = (grupos, combinacoes) => {
     return new Set(combinacoes.map(c => c.join("|||")))
   }, [combinacoes])
 
-  const isValidCombo = (selecoes) => {
-    if (comboSet === null) return true
-    const vals = grupos.map(g => selecoes[g.label] || null)
-    if (vals.some(v => v === null)) return true // parcial — não bloqueia
-    return comboSet.has(vals.join("|||"))
-  }
-
   const isValueAvailable = (grupoLabel, valor, selecoes) => {
     if (comboSet === null) return true
-    const gi = grupos.findIndex(g => g.label === grupoLabel)
     const testSel = { ...selecoes, [grupoLabel]: valor }
-    // verifica se existe ao menos uma combinação completa válida com esse valor
     const check = (gIdx, partial) => {
       if (gIdx === grupos.length) return comboSet.has(partial.join("|||"))
       const g = grupos[gIdx]
@@ -124,13 +124,12 @@ const useCombinacoes = (grupos, combinacoes) => {
     return check(0, [])
   }
 
-  return { isValidCombo, isValueAvailable }
+  return { isValueAvailable }
 }
 
-// ─── Seletores inteligentes (novo formato) ────────────────────────────────────
+// ─── Seletores inteligentes ───────────────────────────────────────────────────
 const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
   const { isValueAvailable } = useCombinacoes(grupos, combinacoes)
-
   return (
     <div className="mt-6 space-y-5">
       <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">Selecione as variações desejadas</p>
@@ -142,18 +141,12 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
               const available = isValueAvailable(g.label, val, selecoes)
               const selected = selecoes[g.label] === val
               return (
-                <button
-                  key={val}
-                  onClick={() => available && onSelect(g.label, val)}
-                  disabled={!available}
+                <button key={val} onClick={() => available && onSelect(g.label, val)} disabled={!available}
                   className={`px-3 py-2 rounded-xl border text-sm font-medium transition-all ${
-                    selected
-                      ? "bg-[#1A50A0] text-white border-[#1A50A0]"
-                      : available
-                        ? "border-gray-200 bg-white text-gray-900 hover:border-[#1A50A0]/50"
-                        : "border-gray-100 bg-gray-50 text-gray-300 line-through cursor-not-allowed"
-                  }`}
-                >
+                    selected ? "bg-[#1A50A0] text-white border-[#1A50A0]"
+                    : available ? "border-gray-200 bg-white text-gray-900 hover:border-[#1A50A0]/50"
+                    : "border-gray-100 bg-gray-50 text-gray-300 line-through cursor-not-allowed"
+                  }`}>
                   {val}
                 </button>
               )
@@ -165,7 +158,7 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
   )
 }
 
-// ─── Seletores legados (formato antigo com +/-) ───────────────────────────────
+// ─── Seletores legados ────────────────────────────────────────────────────────
 const SeletoresLegados = ({ variacoes, selecoes, onUpdate }) => (
   <div className="mt-6 space-y-6">
     <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">Selecione as variações desejadas</p>
@@ -212,11 +205,38 @@ const Produto = () => {
   const [activeImg, setActiveImg] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [added, setAdded] = useState(false)
-
-  // estado para novo formato (seleção única por grupo)
   const [selecaoNova, setSelecaoNova] = useState({})
-  // estado para formato legado (quantidade por opção)
   const [selecaoLegada, setSelecaoLegada] = useState({})
+
+  // ── derivações — ANTES dos early returns ──────────────────────────────────
+  const imagens = useMemo(() =>
+    (product?.fotos?.length ? product.fotos : [product?.foto_url]).filter(Boolean)
+  , [product])
+
+  const { grupos, combinacoes } = useMemo(() =>
+    parseVariacoes(product?.variacoes)
+  , [product])
+
+  const isNovoFormato = grupos.length >= 2
+    || (grupos.length > 0 && combinacoes !== null)
+    || grupos.some(g => g.fotos && Object.keys(g.fotos).length > 0)
+
+  const variacoesLegadas = isNovoFormato
+    ? []
+    : (Array.isArray(product?.variacoes) ? product.variacoes : [])
+
+  const fotoIdxDaSelecao = useMemo(() => {
+    const todosSelected = grupos.filter(g => g.valores.length > 0).every(g => selecaoNova[g.label])
+    if (!todosSelected) return null
+    for (let i = grupos.length - 1; i >= 0; i--) {
+      const g = grupos[i]
+      const val = selecaoNova[g.label]
+      if (val && g.fotos && g.fotos[val] !== undefined) return g.fotos[val]
+    }
+    return null
+  }, [grupos, selecaoNova])
+
+  const imgExibida = fotoIdxDaSelecao !== null ? fotoIdxDaSelecao : activeImg
 
   const updateSelecaoLegada = (label, valor, delta) => {
     const key = `${label}__${valor}`
@@ -227,37 +247,36 @@ const Produto = () => {
     })
   }
 
+  const totalLegado = Object.values(selecaoLegada).reduce((s, q) => s + q, 0)
+  const todosGruposSelecionados = grupos.length === 0 || grupos.every(g => selecaoNova[g.label])
+  const podeAdicionar = isNovoFormato
+    ? (grupos.length === 0 || todosGruposSelecionados)
+    : (variacoesLegadas.length === 0 || totalLegado > 0)
+
   const handleAddToCart = () => {
     if (!product) return
     const cart = getCart()
 
     if (isNovoFormato) {
-      // novo formato — 1 item por combinação selecionada
-      const todosGruposSelecionados = grupos.every(g => selecaoNova[g.label])
       if (grupos.length > 0 && !todosGruposSelecionados) return
-
       const descricaoCombo = grupos.map(g => `${g.label}: ${selecaoNova[g.label]}`).join(" / ")
       const nomeCompleto = grupos.length > 0 ? `${product.nome} — ${descricaoCombo}` : product.nome
       const itemKey = `${product.id}_${JSON.stringify(selecaoNova)}`
       const existing = cart.find(i => i.id === itemKey)
-      const newCart = existing
+      saveCart(existing
         ? cart.map(i => i.id === itemKey ? { ...i, qty: i.qty + 1 } : i)
-        : [...cart, { id: itemKey, nome: nomeCompleto, tipo: product.tipo?.nome, foto_url: product.foto_url, qty: 1 }]
-      saveCart(newCart)
+        : [...cart, { id: itemKey, nome: nomeCompleto, tipo: product.tipo?.nome, foto_url: product.foto_url, qty: 1 }])
     } else {
-      // formato legado
-      const totalSelecionado = Object.values(selecaoLegada).reduce((s, q) => s + q, 0)
-      if (variacoesLegadas.length > 0 && totalSelecionado === 0) return
-
       if (variacoesLegadas.length === 0) {
         const existing = cart.find(i => i.id === product.id)
         saveCart(existing
           ? cart.map(i => i.id === product.id ? { ...i, qty: (i.qty || 0) + 1 } : i)
           : [...cart, { id: product.id, nome: product.nome, tipo: product.tipo?.nome, foto_url: product.foto_url, qty: 1 }])
       } else {
+        if (totalLegado === 0) return
         let newCart = [...cart]
         Object.entries(selecaoLegada).filter(([, qty]) => qty > 0).forEach(([key, qty]) => {
-          const [label, valor] = key.split("__")
+          const [, valor] = key.split("__")
           const itemId = `${product.id}_${key}`
           const existing = newCart.find(i => i.id === itemId)
           if (existing) newCart = newCart.map(i => i.id === itemId ? { ...i, qty: i.qty + qty } : i)
@@ -273,6 +292,7 @@ const Produto = () => {
     setTimeout(() => setAdded(false), 2500)
   }
 
+  // ── early returns ─────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
@@ -284,7 +304,10 @@ const Produto = () => {
         <div className="container py-8 max-w-5xl">
           <div className="grid md:grid-cols-2 gap-10 animate-pulse">
             <div className="aspect-square bg-gray-200 rounded-2xl" />
-            <div className="space-y-4"><div className="h-4 bg-gray-200 rounded w-1/4" /><div className="h-8 bg-gray-200 rounded w-3/4" /></div>
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-1/4" />
+              <div className="h-8 bg-gray-200 rounded w-3/4" />
+            </div>
           </div>
         </div>
         <MobileBottomNav />
@@ -296,28 +319,19 @@ const Produto = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <p className="text-gray-400">Produto não encontrado.</p>
-        <Link to="/catalogo" className="text-[#1A50A0] font-semibold hover:underline">Voltar ao catálogo</Link>
+        <Link to={getCatalogoUrl()} className="text-[#1A50A0] font-semibold hover:underline">Voltar ao catálogo</Link>
       </div>
     )
   }
 
-  const imagens = (product.fotos?.length ? product.fotos : [product.foto_url]).filter(Boolean)
-  const { grupos, combinacoes } = parseVariacoes(product.variacoes)
-  const isNovoFormato = grupos.length >= 2 || (grupos.length > 0 && combinacoes !== null)
-  const variacoesLegadas = isNovoFormato ? [] : (Array.isArray(product.variacoes) ? product.variacoes : [])
-
-  const todosGruposSelecionados = grupos.length === 0 || grupos.every(g => selecaoNova[g.label])
-  const totalLegado = Object.values(selecaoLegada).reduce((s, q) => s + q, 0)
-  const podeAdicionar = isNovoFormato
-    ? (grupos.length === 0 || todosGruposSelecionados)
-    : (variacoesLegadas.length === 0 || totalLegado > 0)
+  const catalogoUrl = getCatalogoUrl()
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b shadow-sm">
         <div className="container flex items-center justify-between h-16">
           <Link to="/"><img src={psrLogo} alt="PSR Embalagens" className="h-10" /></Link>
-          <Link to="/catalogo" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
+          <Link to={catalogoUrl} className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
             <ShoppingBag className="w-4 h-4" /> Voltar ao catálogo
           </Link>
         </div>
@@ -327,7 +341,7 @@ const Produto = () => {
         <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-8">
           <Link to="/" className="hover:text-gray-700 transition-colors">Início</Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <Link to="/catalogo" className="hover:text-gray-700 transition-colors">Catálogo</Link>
+          <Link to={catalogoUrl} className="hover:text-gray-700 transition-colors">Catálogo</Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-gray-900 font-medium">{product.nome}</span>
         </nav>
@@ -337,8 +351,8 @@ const Produto = () => {
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
             <div className="rounded-2xl overflow-hidden bg-white border aspect-square shadow-sm relative group cursor-zoom-in"
               onClick={() => imagens.length > 0 && setLightboxOpen(true)}>
-              {imagens[activeImg]
-                ? <img src={imagens[activeImg]} alt={product.nome} className="w-full h-full object-cover" />
+              {imagens[imgExibida]
+                ? <img src={imagens[imgExibida]} alt={product.nome} className="w-full h-full object-cover" />
                 : <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">sem foto</div>}
               {imagens.length > 0 && (
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
@@ -352,7 +366,7 @@ const Produto = () => {
               <div className="flex gap-3 mt-3">
                 {imagens.map((img, i) => (
                   <button key={i} onClick={() => setActiveImg(i)}
-                    className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${activeImg === i ? "border-[#1A50A0] shadow-sm" : "border-transparent hover:border-gray-200"}`}>
+                    className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${imgExibida === i ? "border-[#1A50A0] shadow-sm" : "border-transparent hover:border-gray-200"}`}>
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
@@ -370,7 +384,6 @@ const Produto = () => {
             <h1 className="text-3xl font-black text-gray-900 leading-tight">{product.nome}</h1>
             <p className="mt-3 text-gray-500 leading-relaxed">{product.descricao}</p>
 
-            {/* seletores */}
             {isNovoFormato && grupos.length > 0 && (
               <SeletoresInteligentes
                 grupos={grupos}
@@ -395,7 +408,6 @@ const Produto = () => {
               </div>
             )}
 
-            {/* resumo seleção nova */}
             {isNovoFormato && todosGruposSelecionados && grupos.length > 0 && (
               <div className="mt-4 bg-[#1A50A0]/5 border border-[#1A50A0]/20 rounded-xl px-4 py-3">
                 <p className="text-xs font-bold text-[#1A50A0] mb-1">Selecionado:</p>
@@ -407,7 +419,6 @@ const Produto = () => {
               </div>
             )}
 
-            {/* resumo seleção legada */}
             {!isNovoFormato && totalLegado > 0 && (
               <div className="mt-4 bg-[#1A50A0]/5 border border-[#1A50A0]/20 rounded-xl px-4 py-3">
                 <p className="text-xs font-bold text-[#1A50A0] mb-1">Selecionado:</p>
@@ -439,7 +450,7 @@ const Produto = () => {
         <RelatedProducts currentProduct={product} allProducts={allProducts} />
       </div>
 
-      {lightboxOpen && <Lightbox images={imagens} startIndex={activeImg} onClose={() => setLightboxOpen(false)} />}
+      {lightboxOpen && <Lightbox images={imagens} startIndex={imgExibida} onClose={() => setLightboxOpen(false)} />}
       <MobileBottomNav />
     </div>
   )

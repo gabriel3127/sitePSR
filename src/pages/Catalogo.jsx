@@ -1,19 +1,19 @@
-﻿import { useState, useMemo } from "react"
+﻿import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, ShoppingBag, X, Send, Plus, Minus, Pencil, Trash2, SlidersHorizontal, ChevronDown, User, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import psrLogo from "@/assets/psr-logo.svg"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { useProducts } from "@/hooks/useProducts"
 import { useAuth } from "@/contexts/AuthContext"
 import AdminBar from "@/components/AdminBar"
 import ProductModal from "@/components/ProductModal"
 import TaxonomyModal from "@/components/TaxonomyModal"
+import VendedoresModal from "@/components/VendedoresModal"
 import MobileBottomNav from "@/components/MobileBottomNav"
 import { supabase } from "@/lib/supabase"
-import TurnstileModal from "@/components/TurnstileModal"
 
-const WA_NUMBER = "5561993177107"
+const WA_NUMBER_DEFAULT = "5561993177107"
 const POR_PAGINA = 24
 const SIDEBAR_LIMIT = 5
 
@@ -24,6 +24,7 @@ const SETOR_EMOJI = {
   "mercados-acougues":          "🛒",
   "padarias-confeitarias":      "🥐",
   "uso-geral":                  "📦",
+  "sustentaveis":               "🌱",
   default:                      "🏷️",
 }
 const getSetorEmoji = (slug) => SETOR_EMOJI[slug] || SETOR_EMOJI.default
@@ -154,6 +155,23 @@ const MobileSetorPills = ({ setores, active, onSelect, onClear }) => (
 const Catalogo = () => {
   const { products, tipos, setores, categorias, loading } = useProducts()
   const { isAdmin } = useAuth()
+  const [searchParams] = useSearchParams()
+
+  // ─── vendedor via ?v=slug ─────────────────────────────────────────────────
+  const [waNumber, setWaNumber] = useState(WA_NUMBER_DEFAULT)
+  const [vendedorNome, setVendedorNome] = useState(null)
+
+  useEffect(() => {
+    const slugParam = searchParams.get("v")
+    const slug = slugParam || sessionStorage.getItem("psr_vendedor_slug")
+    if (!slug) return
+    // persiste o slug para manter ao navegar entre páginas
+    if (slugParam) sessionStorage.setItem("psr_vendedor_slug", slugParam)
+    supabase.from("vendedores").select("nome, whatsapp").eq("slug", slug).eq("ativo", true).single()
+      .then(({ data }) => {
+        if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) }
+      })
+  }, [searchParams])
 
   const [search, setSearch] = useState("")
   const [activeTipo, setActiveTipo] = useState(null)
@@ -166,12 +184,8 @@ const Catalogo = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [taxonomyOpen, setTaxonomyOpen] = useState(false)
+  const [vendedoresOpen, setVendedoresOpen] = useState(false)
   const [showHelper, setShowHelper] = useState(() => localStorage.getItem("psr_helper_seen") !== "true")
-  const [turnstileOpen, setTurnstileOpen] = useState(false)
-
-  const WA_SEND_KEY = "psr_wa_sends"
-  const getWaSends = () => parseInt(sessionStorage.getItem(WA_SEND_KEY) || "0", 10)
-  const incWaSends = () => sessionStorage.setItem(WA_SEND_KEY, getWaSends() + 1)
 
   const toggleHelper = () => {
     if (showHelper) localStorage.setItem("psr_helper_seen", "true")
@@ -278,29 +292,11 @@ const Catalogo = () => {
 
   const totalItems = cart.reduce((sum, item) => sum + (item.qty || 0), 0)
 
-  const doSendWhatsApp = () => {
-    const lines = cart.map((item) => `• ${item.nome} — Qtd: ${item.qty}`)
-    const msg =
-      "Olá! Vim pelo catálogo online da PSR Embalagens e gostaria de solicitar orçamento:\n\n" +
-      lines.join("\n") +
-      "\n\nPodem me passar preços e disponibilidade?"
-    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank")
-    incWaSends()
-  }
-  
   const sendWhatsApp = () => {
-    if (getWaSends() < 2) {
-      // 1ª e 2ª vez: libera direto
-      doSendWhatsApp()
-    } else {
-      // 3ª vez em diante: exige Turnstile
-      setTurnstileOpen(true)
-    }
-  }
-  
-  const handleTurnstileSuccess = (_token) => {
-    setTurnstileOpen(false)
-    doSendWhatsApp()
+    const lines = cart.map((item) => `• ${item.nome} — Qtd: ${item.qty}`)
+    const msg = "Olá! Vim pelo catálogo online da PSR Embalagens e gostaria de solicitar orçamento:\n\n" +
+      lines.join("\n") + "\n\nPodem me passar preços e disponibilidade?"
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank")
   }
 
   return (
@@ -308,7 +304,15 @@ const Catalogo = () => {
       <AdminBar type="catalogo"
         onNewProduct={() => { setEditingProduct(null); setModalOpen(true) }}
         onSettings={() => setTaxonomyOpen(true)}
+        onVendedores={() => setVendedoresOpen(true)}
       />
+
+      {/* banner vendedor ativo — só visível para o admin */}
+      {isAdmin && vendedorNome && (
+        <div className="bg-[#F5C200] text-[#0d1f3c] px-4 py-1.5 text-xs font-semibold text-center">
+          Catálogo do vendedor: {vendedorNome} — os pedidos serão enviados para o WhatsApp dele
+        </div>
+      )}
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b shadow-sm">
@@ -726,21 +730,15 @@ const Catalogo = () => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {turnstileOpen && (
-          <TurnstileModal
-            onSuccess={handleTurnstileSuccess}
-            onClose={() => setTurnstileOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-
       {isAdmin && modalOpen && (
         <ProductModal product={editingProduct} tipos={tipos} setores={setores} categorias={categorias}
           onClose={() => setModalOpen(false)} onSaved={handleSaved} />
       )}
       {isAdmin && taxonomyOpen && (
         <TaxonomyModal onClose={() => setTaxonomyOpen(false)} />
+      )}
+      {isAdmin && vendedoresOpen && (
+        <VendedoresModal onClose={() => setVendedoresOpen(false)} />
       )}
     </div>
   )
