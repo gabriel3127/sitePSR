@@ -83,8 +83,14 @@ const SidebarSection = ({ title, items, active, onSelect, onClear }) => {
 }
 
 // ─── Card mobile (layout vertical com foto grande) ───────────────────────────
-const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete }) => (
-  <Link to={`/catalogo/${product.id}`} className="block bg-card rounded-2xl overflow-hidden border border-border/50 active:scale-[0.99] transition-transform">
+const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete, onToggleAtivo }) => (
+  <Link to={`/catalogo/${product.id}`} className={`block bg-card rounded-2xl overflow-hidden border border-border/50 active:scale-[0.99] transition-transform relative ${!product.ativo ? "opacity-50" : ""}`}>
+    {/* badge inativo */}
+    {isAdmin && !product.ativo && (
+      <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+        Inativo
+      </div>
+    )}
     {/* foto grande */}
     <div className="relative w-full aspect-square overflow-hidden bg-muted">
       {product.foto_url ? (
@@ -106,7 +112,7 @@ const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete }) => (
       )}
     </div>
 
-    {/* info + botão */}
+    {/* info */}
     <div className="p-3">
       <h3 className="font-bold text-foreground text-sm leading-snug line-clamp-2">{product.nome}</h3>
       {product.descricao && (
@@ -119,6 +125,14 @@ const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete }) => (
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(product) }}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground border rounded px-2 py-1 transition-colors">
           <Pencil className="w-3 h-3" /> Editar
+        </button>
+        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleAtivo(product.id, product.ativo) }}
+          className={`flex items-center gap-1 text-xs border rounded px-2 py-1 transition-colors ${
+            product.ativo
+              ? "text-amber-600 border-amber-300 hover:bg-amber-50"
+              : "text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+          }`}>
+          {product.ativo ? "Desativar" : "Ativar"}
         </button>
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(product.id) }}
           className="flex items-center gap-1 text-xs text-destructive border border-destructive/30 rounded px-2 py-1 transition-colors">
@@ -153,8 +167,8 @@ const MobileSetorPills = ({ setores, active, onSelect, onClear }) => (
 
 // ═══════════════════════════════════════════════════════════════════════════════
 const Catalogo = () => {
-  const { products, tipos, setores, categorias, loading } = useProducts()
   const { isAdmin } = useAuth()
+  const { products, tipos, setores, categorias, loading } = useProducts({ includeInactive: isAdmin })
   const [searchParams] = useSearchParams()
 
   // ─── vendedor via ?v=slug ─────────────────────────────────────────────────
@@ -163,14 +177,24 @@ const Catalogo = () => {
 
   useEffect(() => {
     const slugParam = searchParams.get("v")
-    const slug = slugParam || sessionStorage.getItem("psr_vendedor_slug")
-    if (!slug) return
-    // persiste o slug para manter ao navegar entre páginas
-    if (slugParam) sessionStorage.setItem("psr_vendedor_slug", slugParam)
-    supabase.from("vendedores").select("nome, whatsapp").eq("slug", slug).eq("ativo", true).single()
-      .then(({ data }) => {
-        if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) }
-      })
+    if (slugParam) {
+      // URL com parâmetro — persiste e carrega vendedor
+      sessionStorage.setItem("psr_vendedor_slug", slugParam)
+      supabase.from("vendedores").select("nome, whatsapp").eq("slug", slugParam).eq("ativo", true).single()
+        .then(({ data }) => {
+          if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) }
+        })
+    } else {
+      // sem parâmetro na URL — recupera da sessão se existir (cliente voltando de produto)
+      const slug = sessionStorage.getItem("psr_vendedor_slug")
+      if (slug) {
+        supabase.from("vendedores").select("nome, whatsapp").eq("slug", slug).eq("ativo", true).single()
+          .then(({ data }) => {
+            if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) }
+          })
+      }
+      // se não há slug na sessão, usa número padrão (já é o estado inicial)
+    }
   }, [searchParams])
 
   const [search, setSearch] = useState("")
@@ -190,6 +214,11 @@ const Catalogo = () => {
   const toggleHelper = () => {
     if (showHelper) localStorage.setItem("psr_helper_seen", "true")
     setShowHelper(v => !v)
+  }
+
+  const handleToggleAtivo = async (id, ativo) => {
+    await supabase.from("produtos").update({ ativo: !ativo }).eq("id", id)
+    window.location.reload()
   }
 
   const handleSaved = () => window.location.reload()
@@ -478,6 +507,7 @@ const Catalogo = () => {
                             isAdmin={isAdmin}
                             onEdit={(p) => { setEditingProduct(p); setModalOpen(true) }}
                             onDelete={handleDelete}
+                            onToggleAtivo={handleToggleAtivo}
                           />
                         </motion.div>
                       )
@@ -496,7 +526,12 @@ const Catalogo = () => {
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.2, delay: index < POR_PAGINA ? (index % 8) * 0.03 : 0 }}>
                           <Link to={`/catalogo/${product.id}`}
-                            className="block bg-card rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 border border-transparent hover:border-border">
+                            className={`block bg-card rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 border border-transparent hover:border-border relative ${!product.ativo ? "opacity-50" : ""}`}>
+                            {isAdmin && !product.ativo && (
+                              <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                Inativo
+                              </div>
+                            )}
                             <div className="aspect-square overflow-hidden relative bg-muted">
                               {product.foto_url ? (
                                 <img src={product.foto_url} alt={product.nome}
@@ -528,6 +563,14 @@ const Catalogo = () => {
                               <button onClick={() => { setEditingProduct(product); setModalOpen(true) }}
                                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground border rounded px-2 py-1 transition-colors">
                                 <Pencil className="w-3 h-3" /> Editar
+                              </button>
+                              <button onClick={() => handleToggleAtivo(product.id, product.ativo)}
+                                className={`flex items-center gap-1 text-xs border rounded px-2 py-1 transition-colors ${
+                                  product.ativo
+                                    ? "text-amber-600 border-amber-300 hover:bg-amber-50"
+                                    : "text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+                                }`}>
+                                {product.ativo ? "Desativar" : "Ativar"}
                               </button>
                               <button onClick={() => handleDelete(product.id)}
                                 className="flex items-center gap-1 text-xs text-destructive border border-destructive/30 rounded px-2 py-1 transition-colors">
@@ -677,9 +720,24 @@ const Catalogo = () => {
               className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-background border-l shadow-xl flex flex-col">
               <div className="flex items-center justify-between p-4 border-b">
                 <h2 className="font-bold text-lg text-foreground">Sua Lista ({totalItems})</h2>
-                <button onClick={() => setCartOpen(false)} className="p-2 text-muted-foreground hover:text-foreground">
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {cart.length > 0 && (
+                    <button
+                      onClick={() => {
+                        if (confirm("Limpar toda a lista?")) {
+                          setCart([])
+                          localStorage.removeItem("psr_cart")
+                        }
+                      }}
+                      className="text-xs text-destructive hover:underline px-2 py-1"
+                    >
+                      Limpar lista
+                    </button>
+                  )}
+                  <button onClick={() => setCartOpen(false)} className="p-2 text-muted-foreground hover:text-foreground">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {cart.length === 0 ? (
