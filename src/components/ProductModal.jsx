@@ -4,12 +4,23 @@ import { supabase } from "@/lib/supabase"
 import { convertToWebp } from "@/lib/convertToWebp"
 
 const VariacoesEditor = ({ variacoes, fotos, onChange }) => {
-  const addGrupo = () => onChange([...variacoes, { label: "", valores: [""], fotos: {} }])
+  const addGrupo = () => onChange([...variacoes, { label: "", valores: [""], fotos: {}, desativados: [] }])
   const removeGrupo = (gi) => onChange(variacoes.filter((_, i) => i !== gi))
   const updateLabel = (gi, val) => onChange(variacoes.map((g, i) => i === gi ? { ...g, label: val } : g))
   const addValor = (gi) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: [...g.valores, ""] } : g))
   const removeValor = (gi, vi) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: g.valores.filter((_, j) => j !== vi) } : g))
   const updateValor = (gi, vi, val) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: g.valores.map((v, j) => j === vi ? val : v) } : g))
+
+  const toggleDesativado = (gi, val) => {
+    onChange(variacoes.map((g, i) => {
+      if (i !== gi) return g
+      const desativados = g.desativados || []
+      const next = desativados.includes(val)
+        ? desativados.filter(v => v !== val)
+        : [...desativados, val]
+      return { ...g, desativados: next }
+    }))
+  }
 
   const setFotoValor = (gi, valor, fotoIdx) => {
     onChange(variacoes.map((g, i) => {
@@ -36,19 +47,34 @@ const VariacoesEditor = ({ variacoes, fotos, onChange }) => {
           <div className="space-y-2 pl-2">
             {grupo.valores.map((val, vi) => {
               const fotoIdx = grupo.fotos?.[val] ?? null
+              const isDesativado = (grupo.desativados || []).includes(val)
               return (
                 <div key={vi} className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <input type="text" value={val} onChange={(e) => updateValor(gi, vi, e.target.value)}
                       placeholder="ex: Vermelho, 500ml..."
-                      className="flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                      className={`flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring ${isDesativado ? "opacity-40 line-through" : ""}`} />
+                    {/* toggle ativar/desativar valor */}
+                    {val.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => toggleDesativado(gi, val)}
+                        title={isDesativado ? "Ativar esta opção" : "Desativar esta opção"}
+                        className={`px-2 py-1.5 rounded border text-[11px] font-medium transition-colors flex-shrink-0 ${
+                          isDesativado
+                            ? "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                            : "border-amber-300 text-amber-600 hover:bg-amber-50"
+                        }`}>
+                        {isDesativado ? "Ativar" : "Desativar"}
+                      </button>
+                    )}
                     <button onClick={() => removeValor(gi, vi)}
                       className="p-1.5 rounded border border-destructive/30 text-destructive hover:bg-destructive/10 disabled:opacity-30"
                       disabled={grupo.valores.length === 1}>
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  {/* vinculação de foto — só aparece se há fotos no produto */}
+                  {/* vinculação de foto */}
                   {fotos.length > 0 && val.trim() && (
                     <div className="flex items-center gap-2 pl-1">
                       <span className="text-[11px] text-muted-foreground">Foto:</span>
@@ -318,7 +344,8 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
       .map(g => ({
         label: g.label.trim(),
         valores: g.valores.filter(v => v.trim()),
-        fotos: g.fotos || {}
+        fotos: g.fotos || {},
+        desativados: (g.desativados || []).filter(v => g.valores.includes(v))
       }))
 
     const variacoesPayload = variacoesLimpas.length >= 2
