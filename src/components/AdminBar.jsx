@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
-import { LogOut, Plus, Settings } from "lucide-react"
+import { LogOut, Plus, Settings, Users } from "lucide-react"
 
-const AdminBar = ({ onNewProduct, onNewPost, onSettings, type = "catalogo" }) => {
+const AdminBar = ({ onNewProduct, onNewPost, onSettings, onVendedores, type = "catalogo" }) => {
   const { isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
 
@@ -31,6 +31,14 @@ const AdminBar = ({ onNewProduct, onNewPost, onSettings, type = "catalogo" }) =>
             className="flex items-center gap-1.5 text-white/80 hover:text-white border border-white/30 px-3 py-1.5 rounded-lg text-xs transition-colors"
           >
             <Settings className="w-3.5 h-3.5" /> Tipos e setores
+          </button>
+        )}
+        {type === "catalogo" && onVendedores && (
+          <button
+            onClick={onVendedores}
+            className="flex items-center gap-1.5 text-white/80 hover:text-white border border-white/30 px-3 py-1.5 rounded-lg text-xs transition-colors"
+          >
+            <Users className="w-3.5 h-3.5" /> Vendedores
           </button>
         )}
         {type === "blog" && onNewPost && (

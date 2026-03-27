@@ -3,13 +3,24 @@ import { X, Upload, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { convertToWebp } from "@/lib/convertToWebp"
 
-const VariacoesEditor = ({ variacoes, onChange }) => {
-  const addGrupo = () => onChange([...variacoes, { label: "", valores: [""] }])
+const VariacoesEditor = ({ variacoes, fotos, onChange }) => {
+  const addGrupo = () => onChange([...variacoes, { label: "", valores: [""], fotos: {} }])
   const removeGrupo = (gi) => onChange(variacoes.filter((_, i) => i !== gi))
   const updateLabel = (gi, val) => onChange(variacoes.map((g, i) => i === gi ? { ...g, label: val } : g))
   const addValor = (gi) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: [...g.valores, ""] } : g))
   const removeValor = (gi, vi) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: g.valores.filter((_, j) => j !== vi) } : g))
   const updateValor = (gi, vi, val) => onChange(variacoes.map((g, i) => i === gi ? { ...g, valores: g.valores.map((v, j) => j === vi ? val : v) } : g))
+
+  const setFotoValor = (gi, valor, fotoIdx) => {
+    onChange(variacoes.map((g, i) => {
+      if (i !== gi) return g
+      const novasFotos = { ...(g.fotos || {}) }
+      if (fotoIdx === null) delete novasFotos[valor]
+      else novasFotos[valor] = fotoIdx
+      return { ...g, fotos: novasFotos }
+    }))
+  }
+
   return (
     <div className="space-y-3">
       {variacoes.map((grupo, gi) => (
@@ -22,19 +33,56 @@ const VariacoesEditor = ({ variacoes, onChange }) => {
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="space-y-1.5 pl-2">
-            {grupo.valores.map((val, vi) => (
-              <div key={vi} className="flex items-center gap-2">
-                <input type="text" value={val} onChange={(e) => updateValor(gi, vi, e.target.value)}
-                  placeholder="ex: Vermelho, 500ml..."
-                  className="flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-                <button onClick={() => removeValor(gi, vi)}
-                  className="p-1.5 rounded border border-destructive/30 text-destructive hover:bg-destructive/10 disabled:opacity-30"
-                  disabled={grupo.valores.length === 1}>
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
+          <div className="space-y-2 pl-2">
+            {grupo.valores.map((val, vi) => {
+              const fotoIdx = grupo.fotos?.[val] ?? null
+              return (
+                <div key={vi} className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <input type="text" value={val} onChange={(e) => updateValor(gi, vi, e.target.value)}
+                      placeholder="ex: Vermelho, 500ml..."
+                      className="flex-1 px-2 py-1.5 rounded border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                    <button onClick={() => removeValor(gi, vi)}
+                      className="p-1.5 rounded border border-destructive/30 text-destructive hover:bg-destructive/10 disabled:opacity-30"
+                      disabled={grupo.valores.length === 1}>
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {/* vinculação de foto — só aparece se há fotos no produto */}
+                  {fotos.length > 0 && val.trim() && (
+                    <div className="flex items-center gap-2 pl-1">
+                      <span className="text-[11px] text-muted-foreground">Foto:</span>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {fotos.map((url, fi) => (
+                          <button
+                            key={fi}
+                            type="button"
+                            onClick={() => setFotoValor(gi, val, fotoIdx === fi ? null : fi)}
+                            className={`w-9 h-9 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                              fotoIdx === fi
+                                ? "border-primary shadow-sm"
+                                : "border-transparent opacity-50 hover:opacity-80"
+                            }`}
+                            title={fotoIdx === fi ? "Foto vinculada — clique para desvincular" : `Vincular foto ${fi + 1}`}
+                          >
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                        {fotoIdx !== null && (
+                          <button
+                            type="button"
+                            onClick={() => setFotoValor(gi, val, null)}
+                            className="text-[10px] text-destructive hover:underline self-center"
+                          >
+                            remover
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
             <button onClick={() => addValor(gi)} className="flex items-center gap-1 text-xs text-primary hover:underline mt-1">
               <Plus className="w-3 h-3" /> Adicionar opção
             </button>
@@ -267,7 +315,11 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
 
     const variacoesLimpas = variacoes
       .filter(g => g.label.trim())
-      .map(g => ({ label: g.label.trim(), valores: g.valores.filter(v => v.trim()) }))
+      .map(g => ({
+        label: g.label.trim(),
+        valores: g.valores.filter(v => v.trim()),
+        fotos: g.fotos || {}
+      }))
 
     const variacoesPayload = variacoesLimpas.length >= 2
       ? { grupos: variacoesLimpas, combinacoes }
@@ -356,7 +408,7 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Variações</label>
-            <VariacoesEditor variacoes={variacoes} onChange={handleVariacoesChange} />
+            <VariacoesEditor variacoes={variacoes} fotos={fotos} onChange={handleVariacoesChange} />
           </div>
 
           {gruposValidos.length >= 2 && (
