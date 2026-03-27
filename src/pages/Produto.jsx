@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingBag, Plus, Minus, ChevronRight, Check, Trash2, ArrowRight, X, ZoomIn } from "lucide-react"
@@ -138,7 +138,8 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
           <p className="text-xs font-bold text-[#1A50A0] mb-2">{g.label}</p>
           <div className="flex flex-wrap gap-2">
             {g.valores.map(val => {
-              const available = isValueAvailable(g.label, val, selecoes)
+              const desativado = (g.desativados || []).includes(val)
+              const available = !desativado && isValueAvailable(g.label, val, selecoes)
               const selected = selecoes[g.label] === val
               return (
                 <button key={val} onClick={() => available && onSelect(g.label, val)} disabled={!available}
@@ -167,26 +168,31 @@ const SeletoresLegados = ({ variacoes, selecoes, onUpdate }) => (
         <p className="text-xs font-bold text-[#1A50A0] mb-2">{v.label}</p>
         <div className="space-y-2">
           {v.valores.map(val => {
+            const desativado = (v.desativados || []).includes(val)
             const key = `${v.label}__${val}`
             const qty = selecoes[key] || 0
             return (
-              <div key={val} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border transition-colors ${qty > 0 ? "border-[#1A50A0] bg-[#1A50A0]/5" : "border-gray-200 bg-white"}`}>
-                <span className="text-sm font-medium text-gray-900">{val}</span>
-                <div className="flex items-center gap-2">
-                  {qty > 0 && (
-                    <>
-                      <button onClick={() => onUpdate(v.label, val, -1)}
-                        className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                        {qty === 1 ? <Trash2 className="w-3 h-3 text-gray-500" /> : <Minus className="w-3 h-3" />}
-                      </button>
-                      <span className="text-sm font-bold w-5 text-center">{qty}</span>
-                    </>
-                  )}
-                  <button onClick={() => onUpdate(v.label, val, 1)}
-                    className="w-7 h-7 rounded-lg bg-[#1A50A0] text-white flex items-center justify-center hover:bg-[#153f80] transition-colors">
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
+              <div key={val} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border transition-colors ${
+                desativado ? "border-gray-100 bg-gray-50 opacity-50" : qty > 0 ? "border-[#1A50A0] bg-[#1A50A0]/5" : "border-gray-200 bg-white"
+              }`}>
+                <span className={`text-sm font-medium ${desativado ? "text-gray-400 line-through" : "text-gray-900"}`}>{val}</span>
+                {!desativado && (
+                  <div className="flex items-center gap-2">
+                    {qty > 0 && (
+                      <>
+                        <button onClick={() => onUpdate(v.label, val, -1)}
+                          className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                          {qty === 1 ? <Trash2 className="w-3 h-3 text-gray-500" /> : <Minus className="w-3 h-3" />}
+                        </button>
+                        <span className="text-sm font-bold w-5 text-center">{qty}</span>
+                      </>
+                    )}
+                    <button onClick={() => onUpdate(v.label, val, 1)}
+                      className="w-7 h-7 rounded-lg bg-[#1A50A0] text-white flex items-center justify-center hover:bg-[#153f80] transition-colors">
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -202,10 +208,14 @@ const Produto = () => {
   const { product, loading } = useProduct(Number(id))
   const { products: allProducts } = useProducts()
 
+  // volta ao topo ao navegar entre produtos
+  useEffect(() => { window.scrollTo(0, 0) }, [id])
+
   const [activeImg, setActiveImg] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [added, setAdded] = useState(false)
   const [selecaoNova, setSelecaoNova] = useState({})
+  const [qtdNova, setQtdNova] = useState(1)
   const [selecaoLegada, setSelecaoLegada] = useState({})
 
   // ── derivações — ANTES dos early returns ──────────────────────────────────
@@ -262,10 +272,14 @@ const Produto = () => {
       const descricaoCombo = grupos.map(g => `${g.label}: ${selecaoNova[g.label]}`).join(" / ")
       const nomeCompleto = grupos.length > 0 ? `${product.nome} — ${descricaoCombo}` : product.nome
       const itemKey = `${product.id}_${JSON.stringify(selecaoNova)}`
+      // usa a foto da variação selecionada se existir, senão usa a capa
+      const fotoCarrinho = fotoIdxDaSelecao !== null && imagens[fotoIdxDaSelecao]
+        ? imagens[fotoIdxDaSelecao]
+        : product.foto_url
       const existing = cart.find(i => i.id === itemKey)
       saveCart(existing
-        ? cart.map(i => i.id === itemKey ? { ...i, qty: i.qty + 1 } : i)
-        : [...cart, { id: itemKey, nome: nomeCompleto, tipo: product.tipo?.nome, foto_url: product.foto_url, qty: 1 }])
+        ? cart.map(i => i.id === itemKey ? { ...i, qty: i.qty + qtdNova } : i)
+        : [...cart, { id: itemKey, nome: nomeCompleto, tipo: product.tipo?.nome, foto_url: fotoCarrinho, qty: qtdNova }])
     } else {
       if (variacoesLegadas.length === 0) {
         const existing = cart.find(i => i.id === product.id)
@@ -288,6 +302,7 @@ const Produto = () => {
 
     setAdded(true)
     setSelecaoNova({})
+    setQtdNova(1)
     setSelecaoLegada({})
     setTimeout(() => setAdded(false), 2500)
   }
@@ -419,6 +434,24 @@ const Produto = () => {
               </div>
             )}
 
+            {/* quantidade — só no novo formato quando tudo selecionado */}
+            {isNovoFormato && todosGruposSelecionados && grupos.length > 0 && (
+              <div className="mt-4 flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-700">Quantidade:</span>
+                <div className="flex items-center gap-2 border border-gray-200 rounded-xl overflow-hidden">
+                  <button onClick={() => setQtdNova(q => Math.max(1, q - 1))}
+                    className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600">
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-8 text-center text-sm font-bold text-gray-900">{qtdNova}</span>
+                  <button onClick={() => setQtdNova(q => q + 1)}
+                    className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600">
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {!isNovoFormato && totalLegado > 0 && (
               <div className="mt-4 bg-[#1A50A0]/5 border border-[#1A50A0]/20 rounded-xl px-4 py-3">
                 <p className="text-xs font-bold text-[#1A50A0] mb-1">Selecionado:</p>
@@ -439,7 +472,7 @@ const Produto = () => {
                 ) : !podeAdicionar ? (
                   <><ShoppingBag className="w-4 h-4" /> Selecione as variações</>
                 ) : (
-                  <><ShoppingBag className="w-4 h-4" /> Adicionar à lista</>
+                  <><ShoppingBag className="w-4 h-4" /> Adicionar à lista{isNovoFormato && qtdNova > 1 ? ` (${qtdNova})` : ""}</>
                 )}
               </Button>
               <p className="mt-2 text-xs text-gray-400 text-center">Finalize seu pedido pelo carrinho no catálogo</p>
