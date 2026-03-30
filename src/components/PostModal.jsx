@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { X, Upload } from "lucide-react"
+import { X, Upload, Star } from "lucide-react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
