@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { ShoppingBag, Plus, Minus, ChevronRight, Check, Trash2, ArrowRight, X, ZoomIn } from "lucide-react"
+import { ShoppingBag, Plus, Minus, ChevronRight, ChevronLeft, Check, Trash2, ArrowRight, X, ZoomIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import psrLogo from "@/assets/psr-logo.svg"
 import { useProduct, useProducts } from "@/hooks/useProducts"
@@ -128,6 +128,7 @@ const useCombinacoes = (grupos, combinacoes) => {
 }
 
 // ─── Seletores inteligentes ───────────────────────────────────────────────────
+// Mobile: grid 2 colunas com botões full-width | Desktop: flex wrap
 const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
   const { isValueAvailable } = useCombinacoes(grupos, combinacoes)
   return (
@@ -136,17 +137,22 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
       {grupos.map(g => (
         <div key={g.label}>
           <p className="text-xs font-bold text-[#1A50A0] mb-2">{g.label}</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 overflow-hidden">
             {g.valores.map(val => {
               const desativado = (g.desativados || []).includes(val)
               const available = !desativado && isValueAvailable(g.label, val, selecoes)
               const selected = selecoes[g.label] === val
               return (
-                <button key={val} onClick={() => available && onSelect(g.label, val)} disabled={!available}
-                  className={`px-3 py-2 rounded-xl border text-sm font-medium transition-all ${
-                    selected ? "bg-[#1A50A0] text-white border-[#1A50A0]"
-                    : available ? "border-gray-200 bg-white text-gray-900 hover:border-[#1A50A0]/50"
-                    : "border-gray-100 bg-gray-50 text-gray-300 line-through cursor-not-allowed"
+                <button
+                  key={val}
+                  onClick={() => available && onSelect(g.label, val)}
+                  disabled={!available}
+                  className={`px-2 py-1.5 rounded-lg border text-xs md:text-sm font-medium transition-all ${
+                    selected
+                      ? "bg-[#1A50A0] text-white border-[#1A50A0]"
+                      : available
+                      ? "border-gray-200 bg-white text-gray-900 hover:border-[#1A50A0]/50"
+                      : "border-gray-100 bg-gray-50 text-gray-300 line-through cursor-not-allowed"
                   }`}>
                   {val}
                 </button>
@@ -160,35 +166,43 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
 }
 
 // ─── Seletores legados ────────────────────────────────────────────────────────
+// Mobile: grid 2 colunas | Desktop: flex wrap
 const SeletoresLegados = ({ variacoes, selecoes, onUpdate }) => (
   <div className="mt-6 space-y-6">
     <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">Selecione as variações desejadas</p>
     {variacoes.map(v => (
       <div key={v.label}>
         <p className="text-xs font-bold text-[#1A50A0] mb-2">{v.label}</p>
-        <div className="space-y-2">
+        <div className="flex flex-wrap gap-1.5 overflow-hidden">
           {v.valores.map(val => {
             const desativado = (v.desativados || []).includes(val)
             const key = `${v.label}__${val}`
             const qty = selecoes[key] || 0
+            const selected = qty > 0
             return (
-              <div key={val} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border transition-colors ${
-                desativado ? "border-gray-100 bg-gray-50 opacity-50" : qty > 0 ? "border-[#1A50A0] bg-[#1A50A0]/5" : "border-gray-200 bg-white"
-              }`}>
-                <span className={`text-sm font-medium ${desativado ? "text-gray-400 line-through" : "text-gray-900"}`}>{val}</span>
-                {!desativado && (
-                  <div className="flex items-center gap-2">
-                    {qty > 0 && (
-                      <>
-                        <button onClick={() => onUpdate(v.label, val, -1)}
-                          className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                          {qty === 1 ? <Trash2 className="w-3 h-3 text-gray-500" /> : <Minus className="w-3 h-3" />}
-                        </button>
-                        <span className="text-sm font-bold w-5 text-center">{qty}</span>
-                      </>
-                    )}
-                    <button onClick={() => onUpdate(v.label, val, 1)}
-                      className="w-7 h-7 rounded-lg bg-[#1A50A0] text-white flex items-center justify-center hover:bg-[#153f80] transition-colors">
+              <div key={val}>
+                {!selected ? (
+                  <button
+                    onClick={() => !desativado && onUpdate(v.label, val, 1)}
+                    disabled={desativado}
+                    className={`px-2 py-1.5 rounded-lg border text-xs md:text-sm font-medium transition-all ${
+                      desativado
+                        ? "border-gray-100 bg-gray-50 text-gray-300 line-through cursor-not-allowed"
+                        : "border-gray-200 bg-white text-gray-900 hover:border-[#1A50A0]/50"
+                    }`}>
+                    {val}
+                  </button>
+                ) : (
+                  <div className="w-full flex items-center justify-between gap-1 px-2 py-1.5 rounded-xl border border-[#1A50A0] bg-[#1A50A0]/5">
+                    <button
+                      onClick={() => onUpdate(v.label, val, -1)}
+                      className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors flex-shrink-0">
+                      {qty === 1 ? <Trash2 className="w-3 h-3 text-gray-400" /> : <Minus className="w-3 h-3 text-gray-600" />}
+                    </button>
+                    <span className="text-xs font-bold text-[#1A50A0] text-center flex-1 truncate px-1">{qty}× {val}</span>
+                    <button
+                      onClick={() => onUpdate(v.label, val, 1)}
+                      className="w-7 h-7 rounded-lg bg-[#1A50A0] text-white flex items-center justify-center hover:bg-[#153f80] transition-colors flex-shrink-0">
                       <Plus className="w-3 h-3" />
                     </button>
                   </div>
@@ -208,7 +222,6 @@ const Produto = () => {
   const { product, loading } = useProduct(Number(id))
   const { products: allProducts } = useProducts()
 
-  // volta ao topo ao navegar entre produtos
   useEffect(() => { window.scrollTo(0, 0) }, [id])
 
   const [activeImg, setActiveImg] = useState(0)
@@ -217,8 +230,8 @@ const Produto = () => {
   const [selecaoNova, setSelecaoNova] = useState({})
   const [qtdNova, setQtdNova] = useState(1)
   const [selecaoLegada, setSelecaoLegada] = useState({})
+  const [cartCount, setCartCount] = useState(() => getCart().reduce((s, i) => s + (i.qty || 0), 0))
 
-  // ── derivações — ANTES dos early returns ──────────────────────────────────
   const imagens = useMemo(() =>
     (product?.fotos?.length ? product.fotos : [product?.foto_url]).filter(Boolean)
   , [product])
@@ -272,7 +285,6 @@ const Produto = () => {
       const descricaoCombo = grupos.map(g => `${g.label}: ${selecaoNova[g.label]}`).join(" / ")
       const nomeCompleto = grupos.length > 0 ? `${product.nome} — ${descricaoCombo}` : product.nome
       const itemKey = `${product.id}_${JSON.stringify(selecaoNova)}`
-      // usa a foto da variação selecionada se existir, senão usa a capa
       const fotoCarrinho = fotoIdxDaSelecao !== null && imagens[fotoIdxDaSelecao]
         ? imagens[fotoIdxDaSelecao]
         : product.foto_url
@@ -300,6 +312,7 @@ const Produto = () => {
       }
     }
 
+    setCartCount(getCart().reduce((s, i) => s + (i.qty || 0), 0) + (isNovoFormato ? qtdNova : totalLegado || 1))
     setAdded(true)
     setSelecaoNova({})
     setQtdNova(1)
@@ -307,7 +320,6 @@ const Produto = () => {
     setTimeout(() => setAdded(false), 2500)
   }
 
-  // ── early returns ─────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
@@ -343,12 +355,48 @@ const Produto = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
+      {/* Toast de confirmação */}
+      <AnimatePresence>
+        {added && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="fixed bottom-[72px] lg:bottom-8 left-4 right-4 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-auto z-50 flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-xl"
+          >
+            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+              <Check className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="text-sm font-medium whitespace-nowrap">Produto adicionado ao carrinho!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b shadow-sm">
-        <div className="container flex items-center justify-between h-16">
-          <Link to="/"><img src={psrLogo} alt="PSR Embalagens" className="h-10" /></Link>
-          <Link to={catalogoUrl} className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-            <ShoppingBag className="w-4 h-4" /> Voltar ao catálogo
+        <div className="container grid grid-cols-3 items-center h-14">
+          {/* Esquerda: voltar */}
+          <Link to={catalogoUrl} className="flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors">
+            <ChevronLeft className="w-5 h-5" />
           </Link>
+          {/* Centro: logo */}
+          <div className="flex justify-center">
+            <img src={psrLogo} alt="PSR Embalagens" className="h-8" />
+          </div>
+          {/* Direita: carrinho */}
+          <div className="flex justify-end">
+            <Link to={catalogoUrl} className="relative flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <div className="relative">
+                <ShoppingBag className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </span>
+                )}
+              </div>
+              <span className="hidden sm:inline">Carrinho</span>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -364,7 +412,7 @@ const Produto = () => {
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
           {/* galeria */}
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
-            <div className="rounded-2xl overflow-hidden bg-white border aspect-square shadow-sm relative group cursor-zoom-in"
+            <div className="rounded-2xl overflow-hidden bg-white border shadow-sm relative group cursor-zoom-in w-full aspect-square max-h-[50vw] md:max-h-none"
               onClick={() => imagens.length > 0 && setLightboxOpen(true)}>
               {imagens[imgExibida]
                 ? <img src={imagens[imgExibida]} alt={product.nome} className="w-full h-full object-cover" />
@@ -434,7 +482,6 @@ const Produto = () => {
               </div>
             )}
 
-            {/* quantidade — só no novo formato quando tudo selecionado */}
             {isNovoFormato && todosGruposSelecionados && grupos.length > 0 && (
               <div className="mt-4 flex items-center gap-3">
                 <span className="text-sm font-medium text-gray-700">Quantidade:</span>
