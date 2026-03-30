@@ -752,7 +752,13 @@ const Catalogo = () => {
                 <h2 className="font-bold text-lg text-foreground">Sua Lista ({totalItems})</h2>
                 <div className="flex items-center gap-2">
                   {cart.length > 0 && (
-                    <button onClick={() => setConfirmLimpar(true)} className="text-xs text-destructive hover:underline px-2 py-1">Limpar lista</button>
+                    <button
+                      onClick={() => setConfirmLimpar(true)}
+                      className="flex items-center gap-1.5 text-xs font-medium text-destructive border border-destructive/30 rounded-lg px-3 py-1.5 hover:bg-destructive/5 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Limpar lista
+                    </button>
                   )}
                   <button onClick={() => setCartOpen(false)} className="p-2 text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
                 </div>
