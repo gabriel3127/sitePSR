@@ -290,14 +290,14 @@ const FotosEditor = ({ fotos, onChange }) => {
   )
 }
 
-const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved }) => {
+const ProductModal = ({ product, categorias, subcategorias, catSubMap, setores, onClose, onSaved }) => {
   const editing = !!product
 
   const [form, setForm] = useState({
     nome: product?.nome || "",
     descricao: product?.descricao || "",
-    tipo_id: product?.tipo_id || "",
-    categoria_id: product?.categoria_id || "",
+    categoria_id: product?.categoria_id || "",      // ex-tipo_id
+    subcategoria_id: product?.subcategoria_id || "", // ex-categoria_id
     obs: product?.obs || "",
     ativo: product?.ativo ?? true,
   })
@@ -356,8 +356,8 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
       ...form,
       foto_url: fotos[0] || null, fotos,
       variacoes: variacoesPayload,
-      tipo_id: form.tipo_id === "" ? null : Number(form.tipo_id),
       categoria_id: form.categoria_id === "" ? null : Number(form.categoria_id),
+      subcategoria_id: form.subcategoria_id === "" ? null : Number(form.subcategoria_id),
     }
 
     let produtoId = product?.id
@@ -404,19 +404,27 @@ const ProductModal = ({ product, tipos, setores, categorias, onClose, onSaved })
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Tipo (material)</label>
-              <select value={form.tipo_id} onChange={(e) => setForm({ ...form, tipo_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                <option value="">Selecione</option>
-                {tipos.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Categoria (produto)</label>
-              <select value={form.categoria_id} onChange={(e) => setForm({ ...form, categoria_id: e.target.value })}
+              <label className="text-sm font-medium text-foreground">Categoria (material)</label>
+              <select value={form.categoria_id}
+                onChange={(e) => setForm({ ...form, categoria_id: e.target.value, subcategoria_id: "" })}
                 className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="">Selecione</option>
                 {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Subcategoria (produto)</label>
+              <select value={form.subcategoria_id}
+                onChange={(e) => setForm({ ...form, subcategoria_id: e.target.value })}
+                disabled={!form.categoria_id}
+                className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50">
+                <option value="">{form.categoria_id ? "Selecione" : "Selecione a categoria primeiro"}</option>
+                {(form.categoria_id
+                  ? subcategorias.filter(s =>
+                      (catSubMap[Number(form.categoria_id)] || []).includes(s.id)
+                    )
+                  : []
+                ).map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
               </select>
             </div>
           </div>
