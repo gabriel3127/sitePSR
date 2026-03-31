@@ -97,10 +97,13 @@ const RelatedProducts = ({ currentProduct, allProducts }) => {
 }
 
 // ─── Parser de variações ──────────────────────────────────────────────────────
+// Normaliza QUALQUER formato para {grupos, combinacoes}
 const parseVariacoes = (raw) => {
   if (!raw) return { grupos: [], combinacoes: null }
   const data = typeof raw === "string" ? JSON.parse(raw) : raw
+  // Formato legado: array de {label, valores, desativados?}
   if (Array.isArray(data)) return { grupos: data, combinacoes: null }
+  // Formato novo: {grupos, combinacoes}
   return { grupos: data.grupos || [], combinacoes: data.combinacoes ?? null }
 }
 
@@ -127,9 +130,11 @@ const useCombinacoes = (grupos, combinacoes) => {
   return { isValueAvailable }
 }
 
-// ─── Seletores inteligentes ───────────────────────────────────────────────────
-// Mobile: grid 2 colunas com botões full-width | Desktop: flex wrap
-const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
+// ─── Seletores ────────────────────────────────────────────────────────────────
+// Único componente para todos os produtos:
+// - Seleção única por grupo (clica no bloco para selecionar, clica de novo para desmarcar)
+// - Quantidade aparece abaixo após selecionar todos os grupos
+const Seletores = ({ grupos, combinacoes, selecoes, onSelect }) => {
   const { isValueAvailable } = useCombinacoes(grupos, combinacoes)
   return (
     <div className="mt-6 space-y-5">
@@ -137,7 +142,7 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
       {grupos.map(g => (
         <div key={g.label}>
           <p className="text-xs font-bold text-[#1A50A0] mb-2">{g.label}</p>
-          <div className="flex flex-wrap gap-1.5 overflow-hidden">
+          <div className="grid grid-cols-3 gap-1.5">
             {g.valores.map(val => {
               const desativado = (g.desativados || []).includes(val)
               const available = !desativado && isValueAvailable(g.label, val, selecoes)
@@ -147,7 +152,7 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
                   key={val}
                   onClick={() => available && onSelect(g.label, val)}
                   disabled={!available}
-                  className={`px-2 py-1.5 rounded-lg border text-xs md:text-sm font-medium transition-all ${
+                  className={`w-full px-2 py-2 rounded-lg border text-xs font-medium transition-all text-center ${
                     selected
                       ? "bg-[#1A50A0] text-white border-[#1A50A0]"
                       : available
@@ -165,57 +170,6 @@ const SeletoresInteligentes = ({ grupos, combinacoes, selecoes, onSelect }) => {
   )
 }
 
-// ─── Seletores legados ────────────────────────────────────────────────────────
-// Mobile: grid 2 colunas | Desktop: flex wrap
-const SeletoresLegados = ({ variacoes, selecoes, onUpdate }) => (
-  <div className="mt-6 space-y-6">
-    <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">Selecione as variações desejadas</p>
-    {variacoes.map(v => (
-      <div key={v.label}>
-        <p className="text-xs font-bold text-[#1A50A0] mb-2">{v.label}</p>
-        <div className="flex flex-wrap gap-1.5 overflow-hidden">
-          {v.valores.map(val => {
-            const desativado = (v.desativados || []).includes(val)
-            const key = `${v.label}__${val}`
-            const qty = selecoes[key] || 0
-            const selected = qty > 0
-            return (
-              <div key={val}>
-                {!selected ? (
-                  <button
-                    onClick={() => !desativado && onUpdate(v.label, val, 1)}
-                    disabled={desativado}
-                    className={`px-2 py-1.5 rounded-lg border text-xs md:text-sm font-medium transition-all ${
-                      desativado
-                        ? "border-gray-100 bg-gray-50 text-gray-300 line-through cursor-not-allowed"
-                        : "border-gray-200 bg-white text-gray-900 hover:border-[#1A50A0]/50"
-                    }`}>
-                    {val}
-                  </button>
-                ) : (
-                  <div className="w-full flex items-center justify-between gap-1 px-2 py-1.5 rounded-xl border border-[#1A50A0] bg-[#1A50A0]/5">
-                    <button
-                      onClick={() => onUpdate(v.label, val, -1)}
-                      className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors flex-shrink-0">
-                      {qty === 1 ? <Trash2 className="w-3 h-3 text-gray-400" /> : <Minus className="w-3 h-3 text-gray-600" />}
-                    </button>
-                    <span className="text-xs font-bold text-[#1A50A0] text-center flex-1 truncate px-1">{qty}× {val}</span>
-                    <button
-                      onClick={() => onUpdate(v.label, val, 1)}
-                      className="w-7 h-7 rounded-lg bg-[#1A50A0] text-white flex items-center justify-center hover:bg-[#153f80] transition-colors flex-shrink-0">
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    ))}
-  </div>
-)
-
 // ─── Página do produto ────────────────────────────────────────────────────────
 const Produto = () => {
   const { id } = useParams()
@@ -227,11 +181,11 @@ const Produto = () => {
   const [activeImg, setActiveImg] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [added, setAdded] = useState(false)
-  const [selecaoNova, setSelecaoNova] = useState({})
-  const [qtdNova, setQtdNova] = useState(1)
-  const [selecaoLegada, setSelecaoLegada] = useState({})
+  const [selecao, setSelecao] = useState({})   // {label: valor} — seleção única por grupo
+  const [qty, setQty] = useState(1)
   const [cartCount, setCartCount] = useState(() => getCart().reduce((s, i) => s + (i.qty || 0), 0))
 
+  // ── derivações ────────────────────────────────────────────────────────────
   const imagens = useMemo(() =>
     (product?.fotos?.length ? product.fotos : [product?.foto_url]).filter(Boolean)
   , [product])
@@ -240,86 +194,63 @@ const Produto = () => {
     parseVariacoes(product?.variacoes)
   , [product])
 
-  const isNovoFormato = grupos.length >= 2
-    || (grupos.length > 0 && combinacoes !== null)
-    || grupos.some(g => g.fotos && Object.keys(g.fotos).length > 0)
-
-  const variacoesLegadas = isNovoFormato
-    ? []
-    : (Array.isArray(product?.variacoes) ? product.variacoes : [])
-
+  // foto vinculada à variação selecionada
   const fotoIdxDaSelecao = useMemo(() => {
-    const todosSelected = grupos.filter(g => g.valores.length > 0).every(g => selecaoNova[g.label])
+    const todosSelected = grupos.filter(g => g.valores.length > 0).every(g => selecao[g.label])
     if (!todosSelected) return null
     for (let i = grupos.length - 1; i >= 0; i--) {
       const g = grupos[i]
-      const val = selecaoNova[g.label]
+      const val = selecao[g.label]
       if (val && g.fotos && g.fotos[val] !== undefined) return g.fotos[val]
     }
     return null
-  }, [grupos, selecaoNova])
+  }, [grupos, selecao])
 
   const imgExibida = fotoIdxDaSelecao !== null ? fotoIdxDaSelecao : activeImg
 
-  const updateSelecaoLegada = (label, valor, delta) => {
-    const key = `${label}__${valor}`
-    setSelecaoLegada(prev => {
-      const next = Math.max(0, (prev[key] || 0) + delta)
-      if (next === 0) { const { [key]: _, ...rest } = prev; return rest }
-      return { ...prev, [key]: next }
-    })
+  // todos os grupos com valores têm seleção?
+  const todosGruposSelecionados = grupos.length === 0 || grupos.every(g => selecao[g.label])
+  const temVariacoes = grupos.length > 0
+  const podeAdicionar = !temVariacoes || todosGruposSelecionados
+
+  const handleSelect = (label, val) => {
+    setSelecao(prev => ({
+      ...prev,
+      [label]: prev[label] === val ? undefined : val  // toggle
+    }))
   }
 
-  const totalLegado = Object.values(selecaoLegada).reduce((s, q) => s + q, 0)
-  const todosGruposSelecionados = grupos.length === 0 || grupos.every(g => selecaoNova[g.label])
-  const podeAdicionar = isNovoFormato
-    ? (grupos.length === 0 || todosGruposSelecionados)
-    : (variacoesLegadas.length === 0 || totalLegado > 0)
-
   const handleAddToCart = () => {
-    if (!product) return
+    if (!product || !podeAdicionar) return
     const cart = getCart()
 
-    if (isNovoFormato) {
-      if (grupos.length > 0 && !todosGruposSelecionados) return
-      const descricaoCombo = grupos.map(g => `${g.label}: ${selecaoNova[g.label]}`).join(" / ")
-      const nomeCompleto = grupos.length > 0 ? `${product.nome} — ${descricaoCombo}` : product.nome
-      const itemKey = `${product.id}_${JSON.stringify(selecaoNova)}`
+    if (temVariacoes) {
+      const descricaoCombo = grupos.map(g => `${g.label}: ${selecao[g.label]}`).join(" / ")
+      const nomeCompleto = `${product.nome} — ${descricaoCombo}`
+      const itemKey = `${product.id}_${JSON.stringify(selecao)}`
       const fotoCarrinho = fotoIdxDaSelecao !== null && imagens[fotoIdxDaSelecao]
         ? imagens[fotoIdxDaSelecao]
         : product.foto_url
       const existing = cart.find(i => i.id === itemKey)
       saveCart(existing
-        ? cart.map(i => i.id === itemKey ? { ...i, qty: i.qty + qtdNova } : i)
-        : [...cart, { id: itemKey, nome: nomeCompleto, tipo: product.tipo?.nome, foto_url: fotoCarrinho, qty: qtdNova }])
+        ? cart.map(i => i.id === itemKey ? { ...i, qty: i.qty + qty } : i)
+        : [...cart, { id: itemKey, nome: nomeCompleto, tipo: product.tipo?.nome, foto_url: fotoCarrinho, qty }])
     } else {
-      if (variacoesLegadas.length === 0) {
-        const existing = cart.find(i => i.id === product.id)
-        saveCart(existing
-          ? cart.map(i => i.id === product.id ? { ...i, qty: (i.qty || 0) + 1 } : i)
-          : [...cart, { id: product.id, nome: product.nome, tipo: product.tipo?.nome, foto_url: product.foto_url, qty: 1 }])
-      } else {
-        if (totalLegado === 0) return
-        let newCart = [...cart]
-        Object.entries(selecaoLegada).filter(([, qty]) => qty > 0).forEach(([key, qty]) => {
-          const [, valor] = key.split("__")
-          const itemId = `${product.id}_${key}`
-          const existing = newCart.find(i => i.id === itemId)
-          if (existing) newCart = newCart.map(i => i.id === itemId ? { ...i, qty: i.qty + qty } : i)
-          else newCart.push({ id: itemId, nome: `${product.nome} — ${valor}`, tipo: product.tipo?.nome, foto_url: product.foto_url, qty })
-        })
-        saveCart(newCart)
-      }
+      // produto sem variações
+      const existing = cart.find(i => i.id === product.id)
+      saveCart(existing
+        ? cart.map(i => i.id === product.id ? { ...i, qty: (i.qty || 0) + qty } : i)
+        : [...cart, { id: product.id, nome: product.nome, tipo: product.tipo?.nome, foto_url: product.foto_url, qty }])
     }
 
-    setCartCount(getCart().reduce((s, i) => s + (i.qty || 0), 0) + (isNovoFormato ? qtdNova : totalLegado || 1))
+    setCartCount(getCart().reduce((s, i) => s + (i.qty || 0), 0) + qty)
     setAdded(true)
-    setSelecaoNova({})
-    setQtdNova(1)
-    setSelecaoLegada({})
+    setSelecao({})
+    setQty(1)
     setTimeout(() => setAdded(false), 2500)
   }
 
+  // ── early returns ─────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
@@ -355,6 +286,7 @@ const Produto = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
+
       {/* Toast de confirmação */}
       <AnimatePresence>
         {added && (
@@ -373,17 +305,15 @@ const Produto = () => {
         )}
       </AnimatePresence>
 
+      {/* Header */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b shadow-sm">
         <div className="container grid grid-cols-3 items-center h-14">
-          {/* Esquerda: voltar */}
           <Link to={catalogoUrl} className="flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          {/* Centro: logo */}
           <div className="flex justify-center">
             <img src={psrLogo} alt="PSR Embalagens" className="h-8" />
           </div>
-          {/* Direita: carrinho */}
           <div className="flex justify-end">
             <Link to={catalogoUrl} className="relative flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               <div className="relative">
@@ -410,9 +340,10 @@ const Produto = () => {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
-          {/* galeria */}
+
+          {/* ── Galeria ── */}
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
-            <div className="rounded-2xl overflow-hidden bg-white border shadow-sm relative group cursor-zoom-in w-full aspect-square max-h-[50vw] md:max-h-none"
+            <div className="rounded-2xl overflow-hidden bg-white border shadow-sm relative group cursor-zoom-in w-full aspect-square"
               onClick={() => imagens.length > 0 && setLightboxOpen(true)}>
               {imagens[imgExibida]
                 ? <img src={imagens[imgExibida]} alt={product.nome} className="w-full h-full object-cover" />
@@ -426,18 +357,23 @@ const Produto = () => {
               )}
             </div>
             {imagens.length > 1 && (
-              <div className="flex gap-3 mt-3">
-                {imagens.map((img, i) => (
-                  <button key={i} onClick={() => setActiveImg(i)}
-                    className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${imgExibida === i ? "border-[#1A50A0] shadow-sm" : "border-transparent hover:border-gray-200"}`}>
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
+              <div className="flex justify-center gap-1.5 mt-3">
+                {imagens.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImg(i)}
+                    className={`rounded-full transition-all ${
+                      imgExibida === i
+                        ? "w-2.5 h-2.5 bg-[#1A50A0]"
+                        : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
+                    }`}
+                  />
                 ))}
               </div>
             )}
           </motion.div>
 
-          {/* detalhes */}
+          {/* ── Detalhes ── */}
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="flex flex-col">
             {product.categoria && (
               <span className="inline-block self-start px-3 py-1 rounded-full bg-[#1A50A0]/10 text-[#1A50A0] text-xs font-bold uppercase tracking-wide mb-3">
@@ -447,22 +383,17 @@ const Produto = () => {
             <h1 className="text-3xl font-black text-gray-900 leading-tight">{product.nome}</h1>
             <p className="mt-3 text-gray-500 leading-relaxed">{product.descricao}</p>
 
-            {isNovoFormato && grupos.length > 0 && (
-              <SeletoresInteligentes
+            {/* Seletores — único componente para todos os produtos */}
+            {temVariacoes && (
+              <Seletores
                 grupos={grupos}
                 combinacoes={combinacoes}
-                selecoes={selecaoNova}
-                onSelect={(label, val) => setSelecaoNova(prev => ({
-                  ...prev,
-                  [label]: prev[label] === val ? undefined : val
-                }))}
+                selecoes={selecao}
+                onSelect={handleSelect}
               />
             )}
 
-            {!isNovoFormato && variacoesLegadas.length > 0 && (
-              <SeletoresLegados variacoes={variacoesLegadas} selecoes={selecaoLegada} onUpdate={updateSelecaoLegada} />
-            )}
-
+            {/* Obs */}
             {product.obs && (
               <div className="mt-5 bg-gray-100 rounded-xl px-4 py-3">
                 <p className="text-xs text-gray-500 leading-relaxed">
@@ -471,27 +402,29 @@ const Produto = () => {
               </div>
             )}
 
-            {isNovoFormato && todosGruposSelecionados && grupos.length > 0 && (
+            {/* Resumo da seleção */}
+            {temVariacoes && todosGruposSelecionados && (
               <div className="mt-4 bg-[#1A50A0]/5 border border-[#1A50A0]/20 rounded-xl px-4 py-3">
                 <p className="text-xs font-bold text-[#1A50A0] mb-1">Selecionado:</p>
                 <ul className="space-y-0.5">
-                  {grupos.map(g => (
-                    <li key={g.label} className="text-xs text-gray-700">— {g.label}: {selecaoNova[g.label]}</li>
+                  {grupos.map(g => selecao[g.label] && (
+                    <li key={g.label} className="text-xs text-gray-700">— {g.label}: {selecao[g.label]}</li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {isNovoFormato && todosGruposSelecionados && grupos.length > 0 && (
+            {/* Quantidade — aparece só quando tudo selecionado (ou sem variações) */}
+            {podeAdicionar && (
               <div className="mt-4 flex items-center gap-3">
                 <span className="text-sm font-medium text-gray-700">Quantidade:</span>
                 <div className="flex items-center gap-2 border border-gray-200 rounded-xl overflow-hidden">
-                  <button onClick={() => setQtdNova(q => Math.max(1, q - 1))}
+                  <button onClick={() => setQty(q => Math.max(1, q - 1))}
                     className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600">
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="w-8 text-center text-sm font-bold text-gray-900">{qtdNova}</span>
-                  <button onClick={() => setQtdNova(q => q + 1)}
+                  <span className="w-8 text-center text-sm font-bold text-gray-900">{qty}</span>
+                  <button onClick={() => setQty(q => q + 1)}
                     className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600">
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -499,18 +432,7 @@ const Produto = () => {
               </div>
             )}
 
-            {!isNovoFormato && totalLegado > 0 && (
-              <div className="mt-4 bg-[#1A50A0]/5 border border-[#1A50A0]/20 rounded-xl px-4 py-3">
-                <p className="text-xs font-bold text-[#1A50A0] mb-1">Selecionado:</p>
-                <ul className="space-y-0.5">
-                  {Object.entries(selecaoLegada).map(([key, qty]) => {
-                    const [label, valor] = key.split("__")
-                    return <li key={key} className="text-xs text-gray-700">— {label}: {valor} × {qty}</li>
-                  })}
-                </ul>
-              </div>
-            )}
-
+            {/* Botão */}
             <div className="mt-6">
               <Button onClick={handleAddToCart} size="lg" disabled={!podeAdicionar}
                 className={`w-full gap-2 rounded-xl transition-all ${added ? "bg-green-600 hover:bg-green-600" : "bg-[#1A50A0] hover:bg-[#153F80]"}`}>
@@ -519,7 +441,7 @@ const Produto = () => {
                 ) : !podeAdicionar ? (
                   <><ShoppingBag className="w-4 h-4" /> Selecione as variações</>
                 ) : (
-                  <><ShoppingBag className="w-4 h-4" /> Adicionar à lista{isNovoFormato && qtdNova > 1 ? ` (${qtdNova})` : ""}</>
+                  <><ShoppingBag className="w-4 h-4" /> Adicionar à lista{qty > 1 ? ` (${qty})` : ""}</>
                 )}
               </Button>
               <p className="mt-2 text-xs text-gray-400 text-center">Finalize seu pedido pelo carrinho no catálogo</p>
