@@ -19,15 +19,15 @@ const POR_PAGINA_MOBILE = 24
 const POR_PAGINA_DESKTOP = 28
 
 const SETOR_EMOJI = {
-  "festas-eventos":             "🎉",
-  "hamburguerias-lanchonetes":  "🍔",
-  "lavanderias":                "🫧",
-  "mercados-acougues":          "🛒",
-  "padarias-confeitarias":      "🥐",
-  "uso-geral":                  "📦",
-  "sustentaveis":               "🌱",
-  default:                      "🏷️",
+  "gastronomia":       "🍽️",
+  "mercados-acougues": "🛒",
+  "lavanderias":       "🫧",
+  "produtos-limpeza":  "🧹",
+  "para-o-lar":        "🏠",
+  "sustentaveis":      "🌱",
+  default:             "🏷️",
 }
+
 const getSetorEmoji = (slug) => SETOR_EMOJI[slug] || SETOR_EMOJI.default
 
 const extractStoragePath = (url) => {
@@ -202,19 +202,26 @@ const Catalogo = () => {
   const [vendedorNome, setVendedorNome] = useState(null)
 
   useEffect(() => {
-    const slugParam = searchParams.get("v")
-    if (slugParam) {
-      sessionStorage.setItem("psr_vendedor_slug", slugParam)
-      supabase.from("vendedores").select("nome, whatsapp").eq("slug", slugParam).eq("ativo", true).single()
-        .then(({ data }) => { if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) } })
-    } else {
-      const slug = sessionStorage.getItem("psr_vendedor_slug")
-      if (slug) {
-        supabase.from("vendedores").select("nome, whatsapp").eq("slug", slug).eq("ativo", true).single()
+      const slugParam = searchParams.get("v")
+      if (slugParam) {
+        sessionStorage.setItem("psr_vendedor_slug", slugParam)
+        supabase.from("vendedores").select("nome, whatsapp").eq("slug", slugParam).eq("ativo", true).single()
           .then(({ data }) => { if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) } })
+      } else {
+        const slug = sessionStorage.getItem("psr_vendedor_slug")
+        if (slug) {
+          supabase.from("vendedores").select("nome, whatsapp").eq("slug", slug).eq("ativo", true).single()
+            .then(({ data }) => { if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) } })
+        }
       }
-    }
-  }, [searchParams])
+
+      // ── Lê setor da URL ──
+      const setorParam = searchParams.get("setor")
+      if (setorParam) {
+        setActiveSetor(setorParam)
+        sessionStorage.setItem("psr_setor", setorParam)
+      }
+    }, [searchParams])
 
   const [search, setSearch] = useState("")
   const [searchOpen, setSearchOpen] = useState(false)
@@ -378,10 +385,24 @@ const Catalogo = () => {
   const totalItems = cart.reduce((sum, item) => sum + (item.qty || 0), 0)
 
   const sendWhatsApp = () => {
-    const lines = cart.map((item) => `• ${item.nome} — Qtd: ${item.qty}`)
-    const msg = "Olá! Vim pelo catálogo online da PSR Embalagens e gostaria de solicitar orçamento:\n\n" + lines.join("\n") + "\n\nPodem me passar preços e disponibilidade?"
-    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank")
-  }
+      const linhas = cart.map((item) =>
+        `▸ *${item.nome}*\n   Quantidade: ${item.qty} unidade${item.qty > 1 ? "s" : ""}`
+      )
+      const msg = [
+        "*SOLICITAÇÃO DE ORÇAMENTO*",
+        "*PSR Embalagens* — Catálogo Online",
+        "",
+        "━━━━━━━━━━━━━━━━",
+        "*PRODUTOS SELECIONADOS*",
+        "",
+        linhas.join("\n\n"),
+        "",
+        "━━━━━━━━━━━━━━━━",
+        "Pedido feito pelo catálogo online",
+        "psrembalagens.com.br",
+      ].join("\n")
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank")
+    }
 
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">

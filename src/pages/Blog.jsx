@@ -162,7 +162,7 @@ const FeaturedPost = ({ post, isAdmin, onEdit, onDelete }) => {
     >
       <div className="grid md:grid-cols-2">
         {/* imagem */}
-        <div className="relative aspect-video md:aspect-auto overflow-hidden bg-gray-100 min-h-[240px]">
+        <div className="relative aspect-video md:aspect-auto overflow-hidden bg-gray-100 md:max-h-[360px]">
           {post.foto_url ? (
             <img
               src={post.foto_url}
