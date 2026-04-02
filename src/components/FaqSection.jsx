@@ -1,13 +1,8 @@
-﻿import { motion } from "framer-motion";
-import { HelpCircle } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+﻿import { motion, AnimatePresence } from "framer-motion"
+import { useState } from "react"
+import { Plus, Minus, MessageCircle } from "lucide-react"
 
-const WA_LINK = "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20personalizado.%20Podem%20me%20ajudar?";
+const WA_LINK = "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20personalizado.%20Podem%20me%20ajudar?"
 
 const faqs = [
   {
@@ -16,91 +11,149 @@ const faqs = [
   },
   {
     q: "Qual o horário de funcionamento?",
-    a: "Funcionamos de segunda a sexta das 5h às 17h e aos sábados das 5h às 12h. Domingos permanecemos fechados. Estamos localizados no CEASA.",
+    a: "Funcionamos de segunda a sexta das 5h às 17h e aos sábados das 5h às 12h. Domingos permanecemos fechados. Estamos localizados no CEASA, Guará, Brasília — DF.",
   },
   {
     q: "Vocês vendem embalagens para delivery?",
-    a: "Sim! Temos uma linha completa de embalagens para delivery: marmitas, caixas para hambúrguer, sacolas kraft, garrafas e muito mais. Todos resistentes e mantêm a qualidade dos alimentos.",
+    a: "Sim! Temos uma linha completa para delivery: marmitas, caixas para hambúrguer, sacolas kraft, garrafas e muito mais — resistentes e que mantêm a qualidade dos alimentos.",
   },
   {
     q: "Como posso fazer um orçamento?",
-    a: "Você pode solicitar orçamento pelo WhatsApp (61) 99317-7107, pelo formulário de contato do site, ou visitando nossa loja no CEASA, Guará, Brasília-DF.",
+    a: "Você pode solicitar orçamento pelo WhatsApp (61) 99317-7107, pelo formulário de contato do site, ou visitando nossa loja no CEASA.",
   },
   {
     q: "Vocês têm embalagens biodegradáveis?",
-    a: "Sim! Oferecemos uma linha completa de embalagens biodegradáveis e sustentáveis feitas de cana-de-açúcar e outros materiais ecológicos, sem abrir mão da qualidade.",
+    a: "Sim! Oferecemos linha completa de embalagens biodegradáveis e sustentáveis feitas de cana-de-açúcar e outros materiais ecológicos, sem abrir mão da qualidade.",
   },
   {
     q: "Qual a localização da PSR Embalagens?",
-    a: "Estamos no SIA Trecho 10, LOTE 05, PAV B-10B, BOX 07, CEASA, Guará, Brasília - DF, CEP: 71200-100.",
+    a: "SIA Trecho 10, LOTE 05, PAV B-10B, BOX 07, CEASA, Guará, Brasília — DF. CEP: 71200-100.",
   },
-];
+]
 
-const FaqSection = () => {
-  return (
-    <section id="faq" className="py-16 md:py-24 bg-muted">
-      <div className="container max-w-3xl">
+// ─── Item FAQ personalizado (sem Radix) ──────────────────────────────────────
+const FaqItem = ({ faq, index, isOpen, onToggle }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.4, delay: index * 0.07 }}
+    className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
+      isOpen
+        ? "border-[#1A50A0]/25 bg-white shadow-md shadow-[#1A50A0]/8"
+        : "border-[#E8EDF5] bg-white hover:border-[#1A50A0]/20 hover:shadow-sm"
+    }`}
+  >
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+    >
+      <span className={`font-bold text-base leading-snug transition-colors duration-200 ${
+        isOpen ? "text-[#1A50A0]" : "text-[#0D1B2A]"
+      }`}>
+        {faq.q}
+      </span>
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+        isOpen ? "bg-[#1A50A0] text-white" : "bg-[#F7F9FC] text-[#718096]"
+      }`}>
+        {isOpen
+          ? <Minus className="w-3.5 h-3.5" />
+          : <Plus className="w-3.5 h-3.5" />}
+      </div>
+    </button>
+
+    <AnimatePresence initial={false}>
+      {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          key="content"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <div className="px-6 pb-5">
+            <div className="h-px bg-[#E8EDF5] mb-4" />
+            <p className="text-[#4A5568] leading-relaxed text-sm">{faq.a}</p>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </motion.div>
+)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+const FaqSection = () => {
+  const [openIndex, setOpenIndex] = useState(null)
+
+  const toggle = (i) => setOpenIndex(prev => prev === i ? null : i)
+
+  return (
+    <section id="faq" className="py-16 md:py-24 bg-[#F7F9FC] relative overflow-hidden">
+
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/10 to-transparent" />
+        <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/10 to-transparent" />
+      </div>
+
+      <div className="container max-w-3xl relative">
+
+        {/* Cabeçalho */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10"
+          className="text-center mb-12"
         >
-          <p className="text-sm font-semibold text-primary tracking-wide uppercase mb-3">
+          <p className="text-sm font-semibold text-[#1A50A0] tracking-widest uppercase mb-3">
             Dúvidas Frequentes
           </p>
-          <h2 className="text-3xl md:text-4xl font-extrabold font-display text-foreground">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] leading-tight">
             Perguntas e respostas
           </h2>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-3 text-[#718096]">
             Encontre respostas rápidas sobre nossos produtos e serviços
           </p>
         </motion.div>
 
+        {/* Lista de FAQs */}
+        <div className="space-y-3">
+          {faqs.map((faq, i) => (
+            <FaqItem
+              key={i}
+              faq={faq}
+              index={i}
+              isOpen={openIndex === i}
+              onToggle={() => toggle(i)}
+            />
+          ))}
+        </div>
+
+        {/* CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-card rounded-2xl shadow-card p-6 md:p-8"
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-10 text-center"
         >
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`item-${i}`}>
-                <AccordionTrigger className="text-left font-bold font-display text-foreground hover:text-primary transition-colors">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed">
-                  {faq.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8 text-center"
-        >
-          <p className="text-muted-foreground mb-4">Não encontrou a resposta que procurava?</p>
-          <a
+          <p className="text-[#718096] mb-5 text-sm">Não encontrou a resposta que procurava?</p>
+          <motion.a
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg gradient-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#1A50A0] text-white font-semibold hover:bg-[#153F80] transition-colors shadow-lg shadow-[#1A50A0]/25"
           >
+            <MessageCircle className="w-4 h-4" />
             Fale Conosco no WhatsApp
-          </a>
+          </motion.a>
         </motion.div>
+
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default FaqSection;
-
-
+export default FaqSection
