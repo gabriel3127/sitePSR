@@ -10,7 +10,7 @@ const navLinks = [
   { label: "Cat\u00e1logo", href: "/catalogo", isRoute: true },
   { label: "Blog", href: "/blog", isRoute: true },
   { label: "Depoimentos", href: "/depoimentos", isRoute: true },
-  { label: "Sobre", href: "#sobre" },
+  { label: "Localização", href: "#localizacao" },
 ];
 
 const Navbar = () => {
