@@ -153,7 +153,7 @@ const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete, onToggleAtivo 
   </Link>
 )
 
-// ─── Pills de setor mobile — verticais e minimalistas ────────────────────────
+// ─── Pills de setor mobile ────────────────────────────────────────────────────
 const MobileSetorPills = ({ setores, active, onSelect, onClear }) => {
   const containerRef = useRef(null)
 
@@ -168,21 +168,14 @@ const MobileSetorPills = ({ setores, active, onSelect, onClear }) => {
       <button
         onClick={onClear}
         className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
-          !active
-            ? "bg-primary text-white border-primary"
-            : "bg-background text-muted-foreground border-border hover:border-primary/40"
+          !active ? "bg-primary text-white border-primary" : "bg-background text-muted-foreground border-border hover:border-primary/40"
         }`}>
         🏪 Todos
       </button>
       {setores.map((s) => (
-        <button
-          key={s.slug}
-          data-slug={s.slug}
-          onClick={() => onSelect(s.slug)}
+        <button key={s.slug} data-slug={s.slug} onClick={() => onSelect(s.slug)}
           className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
-            active === s.slug
-              ? "bg-primary text-white border-primary"
-              : "bg-background text-muted-foreground border-border hover:border-primary/40"
+            active === s.slug ? "bg-primary text-white border-primary" : "bg-background text-muted-foreground border-border hover:border-primary/40"
           }`}>
           {getSetorEmoji(s.slug)} {s.nome}
         </button>
@@ -202,26 +195,25 @@ const Catalogo = () => {
   const [vendedorNome, setVendedorNome] = useState(null)
 
   useEffect(() => {
-      const slugParam = searchParams.get("v")
-      if (slugParam) {
-        sessionStorage.setItem("psr_vendedor_slug", slugParam)
-        supabase.from("vendedores").select("nome, whatsapp").eq("slug", slugParam).eq("ativo", true).single()
+    const slugParam = searchParams.get("v")
+    if (slugParam) {
+      sessionStorage.setItem("psr_vendedor_slug", slugParam)
+      supabase.from("vendedores").select("nome, whatsapp").eq("slug", slugParam).eq("ativo", true).single()
+        .then(({ data }) => { if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) } })
+    } else {
+      const slug = sessionStorage.getItem("psr_vendedor_slug")
+      if (slug) {
+        supabase.from("vendedores").select("nome, whatsapp").eq("slug", slug).eq("ativo", true).single()
           .then(({ data }) => { if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) } })
-      } else {
-        const slug = sessionStorage.getItem("psr_vendedor_slug")
-        if (slug) {
-          supabase.from("vendedores").select("nome, whatsapp").eq("slug", slug).eq("ativo", true).single()
-            .then(({ data }) => { if (data) { setWaNumber(data.whatsapp); setVendedorNome(data.nome) } })
-        }
       }
-
-      // ── Lê setor da URL ──
-      const setorParam = searchParams.get("setor")
-      if (setorParam) {
-        setActiveSetor(setorParam)
-        sessionStorage.setItem("psr_setor", setorParam)
-      }
-    }, [searchParams])
+    }
+    // ── Lê setor da URL ──
+    const setorParam = searchParams.get("setor")
+    if (setorParam) {
+      setActiveSetor(setorParam)
+      sessionStorage.setItem("psr_setor", setorParam)
+    }
+  }, [searchParams])
 
   const [search, setSearch] = useState("")
   const [searchOpen, setSearchOpen] = useState(false)
@@ -240,21 +232,9 @@ const Catalogo = () => {
   const [showHelper, setShowHelper] = useState(() => localStorage.getItem("psr_helper_seen") !== "true")
   const [confirmLimpar, setConfirmLimpar] = useState(false)
 
-  // Abre busca e foca o input
-  const openSearch = () => {
-    setSearchOpen(true)
-    setTimeout(() => searchInputRef.current?.focus(), 50)
-  }
-
-  const closeSearch = () => {
-    setSearchOpen(false)
-    setSearch("")
-  }
-
-  const toggleHelper = () => {
-    if (showHelper) localStorage.setItem("psr_helper_seen", "true")
-    setShowHelper(v => !v)
-  }
+  const openSearch = () => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50) }
+  const closeSearch = () => { setSearchOpen(false); setSearch("") }
+  const toggleHelper = () => { if (showHelper) localStorage.setItem("psr_helper_seen", "true"); setShowHelper(v => !v) }
 
   const handleToggleAtivo = async (id, ativo) => {
     await supabase.from("produtos").update({ ativo: !ativo }).eq("id", id)
@@ -276,7 +256,6 @@ const Catalogo = () => {
   }
 
   const handleSetorSelect = (slug) => {
-    // toggle: clicando no ativo desmarca
     const novo = activeSetor === slug ? null : slug
     setActiveSetor(novo)
     setPaginaMobile(1)
@@ -341,17 +320,11 @@ const Catalogo = () => {
   const clearFilters = () => { setActiveTipo(null); setActiveCategoria(null); setActiveSetor(null); setSearch(""); setPaginaMobile(1); setPaginaDesktop(1) }
   const mudarPaginaDesktop = (p) => { setPaginaDesktop(p); window.scrollTo({ top: 0, behavior: "smooth" }) }
 
-  // ─── Lazy loading mobile com IntersectionObserver ─────────────────────────
   const sentinelaRef = useRef(null)
-
   useEffect(() => {
     if (!sentinelaRef.current) return
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && paginaMobile < totalPaginasMobile) {
-          setPaginaMobile(p => p + 1)
-        }
-      },
+      (entries) => { if (entries[0].isIntersecting && paginaMobile < totalPaginasMobile) setPaginaMobile(p => p + 1) },
       { rootMargin: "200px" }
     )
     observer.observe(sentinelaRef.current)
@@ -385,24 +358,24 @@ const Catalogo = () => {
   const totalItems = cart.reduce((sum, item) => sum + (item.qty || 0), 0)
 
   const sendWhatsApp = () => {
-      const linhas = cart.map((item) =>
-        `▸ *${item.nome}*\n   Quantidade: ${item.qty} unidade${item.qty > 1 ? "s" : ""}`
-      )
-      const msg = [
-        "*SOLICITAÇÃO DE ORÇAMENTO*",
-        "*PSR Embalagens* — Catálogo Online",
-        "",
-        "━━━━━━━━━━━━━━━━",
-        "*PRODUTOS SELECIONADOS*",
-        "",
-        linhas.join("\n\n"),
-        "",
-        "━━━━━━━━━━━━━━━━",
-        "Pedido feito pelo catálogo online",
-        "psrembalagens.com.br",
-      ].join("\n")
-      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank")
-    }
+    const linhas = cart.map((item) =>
+      `▸ *${item.nome}*\n   Quantidade: ${item.qty} unidade${item.qty > 1 ? "s" : ""}`
+    )
+    const msg = [
+      "🛒 *SOLICITAÇÃO DE ORÇAMENTO*",
+      "*PSR Embalagens* — Catálogo Online",
+      "",
+      "━━━━━━━━━━━━━━━━",
+      "📦 *PRODUTOS SELECIONADOS*",
+      "",
+      linhas.join("\n\n"),
+      "",
+      "━━━━━━━━━━━━━━━━",
+      "📍 Pedido feito pelo catálogo online",
+      "🌐 psrembalagens.com.br",
+    ].join("\n")
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank")
+  }
 
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
@@ -420,8 +393,7 @@ const Catalogo = () => {
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b shadow-sm">
-
-        {/* ── Desktop ── */}
+        {/* Desktop */}
         <div className="hidden lg:flex container items-center gap-4 h-16">
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <img src={psrLogo} alt="PSR Embalagens" className="h-9" />
@@ -444,55 +416,34 @@ const Catalogo = () => {
           </div>
         </div>
 
-        {/* ── Mobile: linha única com busca expansível ── */}
+        {/* Mobile */}
         <div className="lg:hidden h-14 flex items-center px-4 gap-2">
           <AnimatePresence initial={false}>
             {searchOpen ? (
-              /* Modo busca: input full-width + botão fechar */
-              <motion.div key="search-open" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="flex-1 flex items-center gap-2">
+              <motion.div key="search-open" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex items-center gap-2">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Buscar produtos..."
-                    value={search}
+                  <input ref={searchInputRef} type="text" placeholder="Buscar produtos..." value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 rounded-full border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-background text-sm transition-all"
-                  />
+                    className="w-full pl-9 pr-4 py-2 rounded-full border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-background text-sm transition-all" />
                 </div>
                 <button onClick={closeSearch} className="flex-shrink-0 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </motion.div>
             ) : (
-              /* Modo normal: logo + ícones */
-              <motion.div key="search-closed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="flex-1 flex items-center gap-2">
-                {/* Logo */}
+              <motion.div key="search-closed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex items-center gap-2">
                 <Link to="/"><img src={psrLogo} alt="PSR Embalagens" className="h-8 flex-shrink-0" /></Link>
-
-                {/* Busca — ocupa todo o espaço entre logo e ícones direita */}
-                <button onClick={openSearch}
-                  className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full border bg-secondary/50 text-muted-foreground text-sm">
+                <button onClick={openSearch} className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full border bg-secondary/50 text-muted-foreground text-sm">
                   <Search className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate">{search || "Buscar produtos..."}</span>
                 </button>
-
-                {/* Ícones direita */}
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  {/* Filtros */}
                   <button onClick={() => setSidebarOpen(true)}
-                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors relative ${
-                      activeFiltersCount > 0 ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}>
+                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors relative ${activeFiltersCount > 0 ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
                     <SlidersHorizontal className="w-5 h-5" />
-                    {activeFiltersCount > 0 && (
-                      <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
-                    )}
+                    {activeFiltersCount > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />}
                   </button>
-                  {/* Carrinho */}
                   <button onClick={() => setCartOpen(true)}
                     className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors relative">
                     <ShoppingBag className="w-5 h-5" />
@@ -509,19 +460,12 @@ const Catalogo = () => {
         </div>
       </header>
 
-      {/* ── Pills de setor — só mobile ── */}
+      {/* Pills setor mobile */}
       <div className="lg:hidden border-b bg-background">
-        <MobileSetorPills
-          setores={setoresDisponiveis}
-          active={activeSetor}
-          onSelect={handleSetorSelect}
-          onClear={handleSetorClear}
-        />
+        <MobileSetorPills setores={setoresDisponiveis} active={activeSetor} onSelect={handleSetorSelect} onClear={handleSetorClear} />
       </div>
 
-      {/* ═══════════════════════════════════════════════════════
-           DESKTOP: sidebar fixed + conteúdo
-           ═══════════════════════════════════════════════════════ */}
+      {/* ── DESKTOP: sidebar + conteúdo ── */}
       <div className="hidden lg:block">
         <aside id="sidebar-filtros" className="fixed top-16 bottom-0 overflow-y-auto bg-background z-20 w-56 px-5 py-6"
           style={{ borderRight: "1px solid transparent", transition: "border-color 0.2s" }}
@@ -633,9 +577,7 @@ const Catalogo = () => {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════
-           MOBILE
-           ═══════════════════════════════════════════════════════ */}
+      {/* ── MOBILE ── */}
       <div className="lg:hidden container py-6">
         <div className="mb-4">
           <span className="text-xs font-semibold text-primary uppercase tracking-widest border border-primary/20 bg-primary/5 px-2 py-0.5 rounded">Catálogo completo</span>
@@ -674,7 +616,6 @@ const Catalogo = () => {
               </AnimatePresence>
             </div>
 
-            {/* Sentinela de lazy loading — substitui o botão "Carregar mais" */}
             {paginaMobile < totalPaginasMobile && (
               <div ref={sentinelaRef} className="flex justify-center py-8">
                 <div className="flex gap-1.5">
@@ -697,23 +638,43 @@ const Catalogo = () => {
         )}
       </div>
 
-      {/* Helper flutuante — só desktop */}
-      <div className="fixed bottom-6 right-6 z-40 hidden lg:flex items-end gap-2">
+      {/* ── Helper flutuante — desktop e mobile ── */}
+      <div className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40 flex items-end gap-2">
         <AnimatePresence>
           {showHelper && (
-            <motion.div initial={{ opacity: 0, x: 10, scale: 0.9 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, x: 10, scale: 0.9 }} transition={{ duration: 0.2 }}
-              className="bg-background border shadow-lg rounded-2xl rounded-br-sm px-4 py-3 max-w-xs">
+            <motion.div
+              initial={{ opacity: 0, x: 10, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 10, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="relative bg-background border shadow-lg rounded-2xl rounded-br-sm px-4 py-3 max-w-[240px]"
+            >
               <p className="text-sm font-medium text-foreground">Bem-vindo ao catálogo!</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Selecione os produtos e adicione à sua lista. Quando estiver pronto, envie pelo carrinho e entraremos em contato com preços e disponibilidade.</p>
             </motion.div>
           )}
         </AnimatePresence>
-        <button onClick={toggleHelper} className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors flex-shrink-0">
-          <User className="w-5 h-5" />
-        </button>
+        <motion.button
+          onClick={toggleHelper}
+          className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors flex-shrink-0"
+          animate={{ rotate: showHelper ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {showHelper ? (
+              <motion.span key="x" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={{ duration: 0.15 }}>
+                <X className="w-5 h-5" />
+              </motion.span>
+            ) : (
+              <motion.span key="user" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={{ duration: 0.15 }}>
+                <User className="w-5 h-5" />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
       </div>
 
-      {/* Navbar inferior — só mobile */}
+      {/* Navbar inferior mobile */}
       <MobileBottomNav onCartOpen={() => setCartOpen(true)} />
 
       {/* Sidebar filtros mobile */}
@@ -773,12 +734,9 @@ const Catalogo = () => {
                 <h2 className="font-bold text-lg text-foreground">Sua Lista ({totalItems})</h2>
                 <div className="flex items-center gap-2">
                   {cart.length > 0 && (
-                    <button
-                      onClick={() => setConfirmLimpar(true)}
-                      className="flex items-center gap-1.5 text-xs font-medium text-destructive border border-destructive/30 rounded-lg px-3 py-1.5 hover:bg-destructive/5 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Limpar lista
+                    <button onClick={() => setConfirmLimpar(true)}
+                      className="flex items-center gap-1.5 text-xs font-medium text-destructive border border-destructive/30 rounded-lg px-3 py-1.5 hover:bg-destructive/5 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" /> Limpar lista
                     </button>
                   )}
                   <button onClick={() => setCartOpen(false)} className="p-2 text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>

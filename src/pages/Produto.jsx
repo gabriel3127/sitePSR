@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { ShoppingBag, Plus, Minus, ChevronRight, ChevronLeft, Check, Trash2, ArrowRight, X, ZoomIn } from "lucide-react"
+import { ShoppingBag, Plus, Minus, ChevronRight, ChevronLeft, Check, Trash2, ArrowRight, X, ZoomIn, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import psrLogo from "@/assets/psr-logo.svg"
 import { useProduct, useProducts } from "@/hooks/useProducts"
@@ -184,6 +184,47 @@ const Produto = () => {
   const [selecao, setSelecao] = useState({})   // {label: valor} — seleção única por grupo
   const [qty, setQty] = useState(1)
   const [cartCount, setCartCount] = useState(() => getCart().reduce((s, i) => s + (i.qty || 0), 0))
+  const [cartOpen, setCartOpen] = useState(false)
+  const [cartItems, setCartItems] = useState(() => getCart())
+
+  const refreshCart = () => {
+    const c = getCart()
+    setCartItems(c)
+    setCartCount(c.reduce((s, i) => s + (i.qty || 0), 0))
+  }
+
+  const removeFromCart = (itemId) => {
+    const next = getCart().filter(i => i.id !== itemId)
+    saveCart(next)
+    refreshCart()
+  }
+
+  const updateCartQty = (itemId, delta) => {
+    const next = getCart().map(i => i.id === itemId ? { ...i, qty: Math.max(0, (i.qty || 1) + delta) } : i).filter(i => i.qty > 0)
+    saveCart(next)
+    refreshCart()
+  }
+
+  const sendWhatsApp = () => {
+    const waNumber = sessionStorage.getItem("psr_vendedor_wa") || "5561993177107"
+    const linhas = cartItems.map(item =>
+      `▸ *${item.nome}*\n   Quantidade: ${item.qty} unidade${item.qty > 1 ? "s" : ""}`
+    )
+    const msg = [
+      "🛒 *SOLICITAÇÃO DE ORÇAMENTO*",
+      "*PSR Embalagens* — Catálogo Online",
+      "",
+      "━━━━━━━━━━━━━━━━",
+      "📦 *PRODUTOS SELECIONADOS*",
+      "",
+      linhas.join("\n\n"),
+      "",
+      "━━━━━━━━━━━━━━━━",
+      "📍 Pedido feito pelo catálogo online",
+      "🌐 psrembalagens.com.br",
+    ].join("\n")
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank")
+  }
 
   // ── derivações ────────────────────────────────────────────────────────────
   const imagens = useMemo(() =>
@@ -243,7 +284,7 @@ const Produto = () => {
         : [...cart, { id: product.id, nome: product.nome, tipo: product.tipo?.nome, foto_url: product.foto_url, qty }])
     }
 
-    setCartCount(getCart().reduce((s, i) => s + (i.qty || 0), 0) + qty)
+    refreshCart()
     setAdded(true)
     setSelecao({})
     setQty(1)
@@ -268,7 +309,7 @@ const Produto = () => {
             </div>
           </div>
         </div>
-        <MobileBottomNav />
+        <MobileBottomNav onCartOpen={() => { refreshCart(); setCartOpen(true) }} />
       </div>
     )
   }
@@ -315,7 +356,7 @@ const Produto = () => {
             <img src={psrLogo} alt="PSR Embalagens" className="h-8" />
           </div>
           <div className="flex justify-end">
-            <Link to={catalogoUrl} className="relative flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+            <button onClick={() => { refreshCart(); setCartOpen(true) }} className="relative flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               <div className="relative">
                 <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && (
@@ -325,7 +366,7 @@ const Produto = () => {
                 )}
               </div>
               <span className="hidden sm:inline">Carrinho</span>
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -343,34 +384,65 @@ const Produto = () => {
 
           {/* ── Galeria ── */}
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
-            <div className="rounded-2xl overflow-hidden bg-white border shadow-sm relative group cursor-zoom-in w-full aspect-square"
-              onClick={() => imagens.length > 0 && setLightboxOpen(true)}>
-              {imagens[imgExibida]
-                ? <img src={imagens[imgExibida]} alt={product.nome} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">sem foto</div>}
-              {imagens.length > 0 && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-2.5 shadow">
-                    <ZoomIn className="w-5 h-5 text-gray-700" />
+
+            {/* Desktop: thumbnails à esquerda + imagem principal */}
+            <div className="hidden md:flex gap-3">
+              {/* Coluna de thumbnails */}
+              {imagens.length > 1 && (
+                <div className="flex flex-col gap-2 w-16 flex-shrink-0">
+                  {imagens.map((img, i) => (
+                    <button key={i} onClick={() => setActiveImg(i)}
+                      className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
+                        imgExibida === i ? "border-[#1A50A0] shadow-sm" : "border-transparent hover:border-gray-200"
+                      }`}>
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              {/* Imagem principal */}
+              <div className="flex-1 rounded-2xl overflow-hidden bg-white border shadow-sm relative group cursor-zoom-in aspect-square"
+                onClick={() => imagens.length > 0 && setLightboxOpen(true)}>
+                {imagens[imgExibida]
+                  ? <img src={imagens[imgExibida]} alt={product.nome} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">sem foto</div>}
+                {imagens.length > 0 && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-2.5 shadow">
+                      <ZoomIn className="w-5 h-5 text-gray-700" />
+                    </div>
                   </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile: imagem principal + pontos */}
+            <div className="md:hidden">
+              <div className="rounded-2xl overflow-hidden bg-white border shadow-sm relative group cursor-zoom-in w-full aspect-square"
+                onClick={() => imagens.length > 0 && setLightboxOpen(true)}>
+                {imagens[imgExibida]
+                  ? <img src={imagens[imgExibida]} alt={product.nome} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">sem foto</div>}
+                {imagens.length > 0 && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-2.5 shadow">
+                      <ZoomIn className="w-5 h-5 text-gray-700" />
+                    </div>
+                  </div>
+                )}
+              </div>
+              {imagens.length > 1 && (
+                <div className="flex justify-center gap-1.5 mt-3">
+                  {imagens.map((_, i) => (
+                    <button key={i} onClick={() => setActiveImg(i)}
+                      className={`rounded-full transition-all ${
+                        imgExibida === i ? "w-2.5 h-2.5 bg-[#1A50A0]" : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
+                      }`} />
+                  ))}
                 </div>
               )}
             </div>
-            {imagens.length > 1 && (
-              <div className="flex justify-center gap-1.5 mt-3">
-                {imagens.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImg(i)}
-                    className={`rounded-full transition-all ${
-                      imgExibida === i
-                        ? "w-2.5 h-2.5 bg-[#1A50A0]"
-                        : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
+
           </motion.div>
 
           {/* ── Detalhes ── */}
@@ -452,8 +524,70 @@ const Produto = () => {
         <RelatedProducts currentProduct={product} allProducts={allProducts} />
       </div>
 
+      {/* Drawer carrinho */}
+      <AnimatePresence>
+        {cartOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setCartOpen(false)} className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" />
+            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 250 }}
+              className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white border-l shadow-xl flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="font-bold text-lg text-gray-900">Sua Lista ({cartItems.reduce((s,i)=>s+(i.qty||0),0)})</h2>
+                <button onClick={() => setCartOpen(false)} className="p-2 text-gray-400 hover:text-gray-700">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {cartItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+                    <p className="text-gray-400">Lista vazia. Adicione produtos.</p>
+                  </div>
+                ) : cartItems.map(item => (
+                  <div key={item.id} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    {item.foto_url
+                      ? <img src={item.foto_url} alt={item.nome} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                      : <div className="w-14 h-14 rounded-lg bg-gray-200 flex-shrink-0 flex items-center justify-center"><ShoppingBag className="w-5 h-5 text-gray-400" /></div>}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm leading-snug line-clamp-2">{item.nome}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{item.tipo}</p>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button onClick={() => removeFromCart(item.id)} className="w-7 h-7 rounded-full hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => updateCartQty(item.id, -1)} className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="text-sm font-bold w-5 text-center">{item.qty || 1}</span>
+                      <button onClick={() => updateCartQty(item.id, 1)} className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {cartItems.length > 0 && (
+                <div className="p-4 border-t space-y-2">
+                  <button onClick={sendWhatsApp}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#1A50A0] hover:bg-[#153F80] text-white font-semibold transition-colors">
+                    <Send className="w-4 h-4" /> Enviar lista pelo WhatsApp
+                  </button>
+                  <Link to={catalogoUrl}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    Continuar comprando
+                  </Link>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {lightboxOpen && <Lightbox images={imagens} startIndex={imgExibida} onClose={() => setLightboxOpen(false)} />}
-      <MobileBottomNav />
+      <MobileBottomNav onCartOpen={() => { refreshCart(); setCartOpen(true) }} />
     </div>
   )
 }
