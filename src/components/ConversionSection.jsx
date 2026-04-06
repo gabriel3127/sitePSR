@@ -175,7 +175,7 @@ const ConversionSection = () => {
               onChange={(e) => setForm({ ...form, mensagem: e.target.value })}
               onFocus={() => setFocused("msg")}
               onBlur={() => setFocused(null)}
-              className={`${inputClass("msg")} resize-none min-h-[160px]`}
+              className={`${inputClass("msg")} resize-none min-h-[340px]`}
             />
 
             <motion.button
