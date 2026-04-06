@@ -7,7 +7,6 @@ import psrLogo from "@/assets/psr-logo.svg";
 const WA_LINK = "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20personalizado.%20Podem%20me%20ajudar?";
 
 const navLinks = [
-  { label: "Produtos", href: "#produtos" },
   { label: "Cat\u00e1logo", href: "/catalogo", isRoute: true },
   { label: "Blog", href: "/blog", isRoute: true },
   { label: "Depoimentos", href: "/depoimentos", isRoute: true },
