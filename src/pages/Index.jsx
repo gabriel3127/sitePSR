@@ -21,8 +21,8 @@ const Index = () => {
       <AboutSection />
       <InstagramFeed />
       <LocationSection />
-      <FaqSection />
       <ConversionSection />
+      <FaqSection />
       <Footer />
       <WhatsAppButton />
       <MobileBottomNav />
