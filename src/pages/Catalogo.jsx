@@ -13,6 +13,7 @@ import VendedoresModal from "@/components/VendedoresModal"
 import MobileBottomNav from "@/components/MobileBottomNav"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { supabase } from "@/lib/supabase"
+import { useCanonical } from "@/hooks/useCanonical"
 
 const WA_NUMBER_DEFAULT = "5561993177107"
 const POR_PAGINA_MOBILE = 24
@@ -22,7 +23,7 @@ const SETOR_EMOJI = {
   "gastronomia":       "🍽️",
   "mercados-acougues": "🛒",
   "lavanderias":       "🫧",
-  "produtos-limpeza":  "🧹",
+  "Limpeza e Higiene":  "🧹",
   "para-o-lar":        "🏠",
   "sustentaveis":      "🌱",
   default:             "🏷️",
@@ -186,6 +187,8 @@ const MobileSetorPills = ({ setores, active, onSelect, onClear }) => {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 const Catalogo = () => {
+  useCanonical()
+  
   const { isAdmin } = useAuth()
   const { products, categorias, subcategorias, tipos, setores, catSubMap, loading } = useProducts({ includeInactive: isAdmin })
   const [searchParams] = useSearchParams()
@@ -221,7 +224,7 @@ const Catalogo = () => {
   const [activeCategoria, setActiveCategoria] = useState(null)
   const [activeSetor, setActiveSetor] = useState(() => sessionStorage.getItem("psr_setor") || null)
   const [paginaMobile, setPaginaMobile] = useState(1)
-  const [paginaDesktop, setPaginaDesktop] = useState(1)
+  const [paginaDesktop, setPaginaDesktop] = useState(() => Number(sessionStorage.getItem("psr_pagina_desktop")) || 1)
   const [cart, setCart] = useState(loadCart)
   const [cartOpen, setCartOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -273,7 +276,6 @@ const Catalogo = () => {
 
   const filtered = useMemo(() => {
     setPaginaMobile(1)
-    setPaginaDesktop(1)
     return products.filter((p) => {
       const matchTipo = !activeTipo || p.tipo?.slug === activeTipo
       const matchCategoria = !activeCategoria || p.categoria?.slug === activeCategoria
@@ -317,8 +319,8 @@ const Catalogo = () => {
   const produtosVisivelDesktop = useMemo(() => filtered.slice((paginaDesktop - 1) * POR_PAGINA_DESKTOP, paginaDesktop * POR_PAGINA_DESKTOP), [filtered, paginaDesktop])
 
   const activeFiltersCount = [activeTipo, activeCategoria, activeSetor].filter(Boolean).length
-  const clearFilters = () => { setActiveTipo(null); setActiveCategoria(null); setActiveSetor(null); setSearch(""); setPaginaMobile(1); setPaginaDesktop(1) }
-  const mudarPaginaDesktop = (p) => { setPaginaDesktop(p); window.scrollTo({ top: 0, behavior: "smooth" }) }
+  const clearFilters = () => { setActiveTipo(null); setActiveCategoria(null); setActiveSetor(null); setSearch(""); setPaginaMobile(1); setPaginaDesktop(1); sessionStorage.removeItem("psr_pagina_desktop") }
+  const mudarPaginaDesktop = (p) => { setPaginaDesktop(p); sessionStorage.setItem("psr_pagina_desktop", p); window.scrollTo({ top: 0, behavior: "smooth" }) }
 
   const sentinelaRef = useRef(null)
   useEffect(() => {

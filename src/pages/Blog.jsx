@@ -9,6 +9,7 @@ import AdminBar from "@/components/AdminBar"
 import PostModal from "@/components/PostModal"
 import MobileBottomNav from "@/components/MobileBottomNav"
 import { supabase } from "@/lib/supabase"
+import { useCanonical } from "@/hooks/useCanonical"
 
 // ─── Cores por categoria ────────────────────────────────────────────────────
 const CATEGORIA_STYLE = {
@@ -256,6 +257,7 @@ const SkeletonCards = () => (
 // ════════════════════════════════════════════════════════════════════════════
 export const BlogPost = () => {
   const { slug } = useParams()
+  useCanonical(`https://www.psrembalagens.com.br/blog/${slug}`)
   const navigate = useNavigate()
   const { post, loading, setPost } = usePost(slug)
   const { isAdmin } = useAuth()
@@ -365,6 +367,8 @@ export const BlogPost = () => {
 // Blog (lista principal)
 // ════════════════════════════════════════════════════════════════════════════
 const Blog = () => {
+  useCanonical()
+
   const { posts, loading } = usePosts()
   const { isAdmin } = useAuth()
   const [activeCategoria, setActiveCategoria] = useState("Todos")

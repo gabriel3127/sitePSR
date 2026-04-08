@@ -12,10 +12,11 @@ import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
 const Index = () => {
+  useCanonical("https://www.psrembalagens.com.br/")
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
+      <Navbar />
       <main>
-        <Navbar />
         <HeroSection />
         <SocialProof />
         <ProductGrid />
