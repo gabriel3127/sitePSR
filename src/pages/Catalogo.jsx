@@ -23,7 +23,7 @@ const SETOR_EMOJI = {
   "gastronomia":       "🍽️",
   "mercados-acougues": "🛒",
   "lavanderias":       "🫧",
-  "Limpeza e Higiene":  "🧹",
+  "produtos-limpeza":  "🧹",
   "para-o-lar":        "🏠",
   "sustentaveis":      "🌱",
   default:             "🏷️",
@@ -108,7 +108,7 @@ const Paginacao = ({ paginaAtual, totalPaginas, onMudar }) => {
 
 // ─── Card mobile ──────────────────────────────────────────────────────────────
 const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete, onToggleAtivo }) => (
-  <Link to={`/catalogo/${product.id}`} className={`block bg-card rounded-2xl overflow-hidden border border-border/50 active:scale-[0.99] transition-transform relative ${!product.ativo ? "opacity-50" : ""}`}>
+  <Link to={`/catalogo/${product.id}`} onClick={() => sessionStorage.setItem("psr_scroll_y", window.scrollY)} className={`block bg-card rounded-2xl overflow-hidden border border-border/50 active:scale-[0.99] transition-transform relative ${!product.ativo ? "opacity-50" : ""}`}>
     {isAdmin && !product.ativo && (
       <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Inativo</div>
     )}
@@ -132,7 +132,7 @@ const MobileCard = ({ product, inCart, isAdmin, onEdit, onDelete, onToggleAtivo 
       )}
     </div>
     <div className="p-3">
-      <h3 className="font-bold text-foreground text-sm leading-snug line-clamp-2">{product.nome}</h3>
+      <h2 className="font-bold text-foreground text-sm leading-snug line-clamp-2">{product.nome}</h2>
       {product.descricao && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.descricao}</p>}
     </div>
     {isAdmin && (
@@ -188,7 +188,6 @@ const MobileSetorPills = ({ setores, active, onSelect, onClear }) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 const Catalogo = () => {
   useCanonical()
-  
   const { isAdmin } = useAuth()
   const { products, categorias, subcategorias, tipos, setores, catSubMap, loading } = useProducts({ includeInactive: isAdmin })
   const [searchParams] = useSearchParams()
@@ -322,6 +321,20 @@ const Catalogo = () => {
   const clearFilters = () => { setActiveTipo(null); setActiveCategoria(null); setActiveSetor(null); setSearch(""); setPaginaMobile(1); setPaginaDesktop(1); sessionStorage.removeItem("psr_pagina_desktop") }
   const mudarPaginaDesktop = (p) => { setPaginaDesktop(p); sessionStorage.setItem("psr_pagina_desktop", p); window.scrollTo({ top: 0, behavior: "smooth" }) }
 
+  // ─── Persistir posição do scroll ─────────────────────────────────────────
+  useEffect(() => {
+    const savedScroll = sessionStorage.getItem("psr_scroll_y")
+    if (savedScroll) {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: Number(savedScroll), behavior: "instant" })
+        sessionStorage.removeItem("psr_scroll_y")
+      })
+    }
+    const handleBeforeUnload = () => sessionStorage.removeItem("psr_scroll_y")
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [])
+
   const sentinelaRef = useRef(null)
   useEffect(() => {
     if (!sentinelaRef.current) return
@@ -436,17 +449,17 @@ const Catalogo = () => {
             ) : (
               <motion.div key="search-closed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex items-center gap-2">
                 <Link to="/"><img src={psrLogo} alt="PSR Embalagens" className="h-8 flex-shrink-0" /></Link>
-                <button onClick={openSearch} className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full border bg-secondary/50 text-muted-foreground text-sm">
+                <button onClick={openSearch} className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full border bg-secondary/50 text-foreground/70 text-sm">
                   <Search className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate">{search || "Buscar produtos..."}</span>
                 </button>
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <button onClick={() => setSidebarOpen(true)}
+                  <button onClick={() => setSidebarOpen(true)} aria-label="Abrir filtros"
                     className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors relative ${activeFiltersCount > 0 ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
                     <SlidersHorizontal className="w-5 h-5" />
                     {activeFiltersCount > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />}
                   </button>
-                  <button onClick={() => setCartOpen(true)}
+                  <button onClick={() => setCartOpen(true)} aria-label="Abrir carrinho"
                     className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors relative">
                     <ShoppingBag className="w-5 h-5" />
                     {totalItems > 0 && (
@@ -467,6 +480,7 @@ const Catalogo = () => {
         <MobileSetorPills setores={setoresDisponiveis} active={activeSetor} onSelect={handleSetorSelect} onClear={handleSetorClear} />
       </div>
 
+      <main>
       {/* ── DESKTOP: sidebar + conteúdo ── */}
       <div className="hidden lg:block">
         <aside id="sidebar-filtros" className="fixed top-16 bottom-0 overflow-y-auto bg-background z-20 w-56 px-5 py-6"
@@ -536,7 +550,7 @@ const Catalogo = () => {
                     const inCart = cart.find((c) => c.id === product.id)
                     return (
                       <motion.div key={product.id} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2, delay: (index % POR_PAGINA_DESKTOP) * 0.02 }}>
-                        <Link to={`/catalogo/${product.id}`} className={`block bg-card rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 border border-transparent hover:border-border relative ${!product.ativo ? "opacity-50" : ""}`}>
+                        <Link to={`/catalogo/${product.id}`} onClick={() => sessionStorage.setItem("psr_scroll_y", window.scrollY)} className={`block bg-card rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 border border-transparent hover:border-border relative ${!product.ativo ? "opacity-50" : ""}`}>
                           {isAdmin && !product.ativo && <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Inativo</div>}
                           <div className="aspect-square overflow-hidden relative bg-muted">
                             {product.foto_url
@@ -545,7 +559,7 @@ const Catalogo = () => {
                           </div>
                           <div className="p-3.5">
                             {product.categoria && <span className="text-xs font-semibold text-primary uppercase tracking-wide">{product.categoria.nome}</span>}
-                            <h3 className="font-semibold text-foreground mt-0.5 leading-snug line-clamp-2">{product.nome}</h3>
+                            <h2 className="font-semibold text-foreground mt-0.5 leading-snug line-clamp-2">{product.nome}</h2>
                             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.descricao}</p>
                             <div className="mt-3 flex items-center justify-between">
                               <span className="text-xs text-muted-foreground">{product.tipo?.nome}</span>
@@ -639,6 +653,7 @@ const Catalogo = () => {
           </>
         )}
       </div>
+      </main>
 
       {/* ── Helper flutuante — desktop e mobile ── */}
       <div className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40 flex items-end gap-2">
@@ -658,6 +673,7 @@ const Catalogo = () => {
         </AnimatePresence>
         <motion.button
           onClick={toggleHelper}
+          aria-label={showHelper ? "Fechar ajuda" : "Abrir ajuda"}
           className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors flex-shrink-0"
           animate={{ rotate: showHelper ? 90 : 0 }}
           transition={{ duration: 0.2 }}
