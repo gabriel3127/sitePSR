@@ -9,12 +9,12 @@ const Footer = () => {
           <div>
             <img src={psrLogo} alt="PSR Embalagens" className="h-8 mb-3" />
             <p className="text-sm text-muted-foreground">
-              Distribuidora de embalagens no DF desde 2009. Qualidade e preço justo.
+              Distribuidora de embalagens no DF desde 2010. Qualidade e preço justo.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-foreground text-sm mb-3">Páginas</h4>
+            <h2 className="font-semibold text-foreground text-sm mb-3">Páginas</h2>
             <div className="flex flex-col gap-2">
               <Link to="/catalogo" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Catálogo</Link>
               <Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
@@ -24,7 +24,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-foreground text-sm mb-3">Contato</h4>
+            <h2 className="font-semibold text-foreground text-sm mb-3">Contato</h2>
             <div className="flex flex-col gap-2">
               <a href="tel:+5561993177107" className="text-sm text-muted-foreground hover:text-foreground transition-colors">(61) 99317-7107</a>
               <a href="https://wa.me/5561993177107" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">WhatsApp</a>
@@ -32,7 +32,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-foreground text-sm mb-3">Redes Sociais</h4>
+            <h2 className="font-semibold text-foreground text-sm mb-3">Redes Sociais</h2>
             <div className="flex flex-col gap-2">
               <a href="https://www.instagram.com/psrembalagens" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Instagram</a>
               <a href="https://www.facebook.com/psrembalagens" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Facebook</a>
