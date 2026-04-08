@@ -14,15 +14,17 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
-      <Navbar />
-      <HeroSection />
-      <SocialProof />
-      <ProductGrid />
-      <AboutSection />
-      <InstagramFeed />
-      <LocationSection />
-      <ConversionSection />
-      <FaqSection />
+      <main>
+        <Navbar />
+        <HeroSection />
+        <SocialProof />
+        <ProductGrid />
+        <AboutSection />
+        <InstagramFeed />
+        <LocationSection />
+        <ConversionSection />
+        <FaqSection />
+      </main>
       <Footer />
       <WhatsAppButton />
       <MobileBottomNav />
