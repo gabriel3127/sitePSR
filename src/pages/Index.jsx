@@ -10,6 +10,7 @@ import ConversionSection from "@/components/ConversionSection";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { useCanonical } from "@/hooks/useCanonical"
 
 const Index = () => {
   useCanonical("https://www.psrembalagens.com.br/")
