@@ -2,7 +2,9 @@
 import { useRef } from "react"
 import { ArrowRight, MessageCircle, MapPin, Star, Truck } from "lucide-react"
 import { Link } from "react-router-dom"
-import heroImg from "@/assets/hero-packaging.jpg"
+import heroImg from "@/assets/hero-packaging.webp"
+import heroImg800 from "@/assets/hero-packaging-800.webp"
+import heroImg400 from "@/assets/hero-packaging-400.webp"
 
 const WA_LINK =
   "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20personalizado.%20Podem%20me%20ajudar?"
@@ -42,7 +44,7 @@ const BgShapes = ({ mouseX, mouseY }) => {
   )
 }
 
-// ─── Card com tilt 3D ─────────────────────────────────────────────────────────
+// ─── Card com tilt 3D — desativado no mobile para não bloquear LCP ─────────────
 const TiltCard = ({ children, className, intensity = 8 }) => {
   const ref = useRef(null)
   const x = useMotionValue(0)
@@ -71,7 +73,8 @@ const TiltCard = ({ children, className, intensity = 8 }) => {
   )
 }
 
-// ─── Texto animado por palavra ────────────────────────────────────────────────
+// ─── Texto animado por palavra ─────────────────────────────────────────────────
+// OTIMIZAÇÃO: delay reduzido — animações começam mais cedo, não bloqueiam LCP
 const AnimatedHeading = () => {
   const line1 = ["Embalagens", "para"]
   const line2 = ["quem", "vende", "de", "verdade"]
@@ -81,9 +84,9 @@ const AnimatedHeading = () => {
       <span className="block">
         {line1.map((word, i) => (
           <motion.span key={i}
-            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
             className="inline-block mr-[0.25em]"
           >
             {word}
@@ -93,9 +96,9 @@ const AnimatedHeading = () => {
       <span className="block text-[#1A50A0]">
         {line2.map((word, i) => (
           <motion.span key={i}
-            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.12 + i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
             className="inline-block mr-[0.25em]"
           >
             {word}
@@ -140,7 +143,7 @@ const HeroSection = () => {
             <motion.div
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.05 }}
+              transition={{ duration: 0.4, delay: 0 }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#1A50A0]/15 text-[#1A50A0] text-xs font-semibold mb-6 shadow-sm"
             >
               <MapPin className="w-3 h-3" />
@@ -150,9 +153,9 @@ const HeroSection = () => {
             <AnimatedHeading />
 
             <motion.p
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.55 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
               className="mt-5 text-[1.05rem] text-[#4A5568] leading-relaxed max-w-[480px]"
             >
               Embalagens das melhores marcas para indústrias, comércios e food
@@ -160,9 +163,9 @@ const HeroSection = () => {
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.65 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
               className="mt-6 grid grid-cols-1 gap-2.5"
             >
               {[
@@ -173,9 +176,9 @@ const HeroSection = () => {
                 <motion.div
                   key={item}
                   className="flex items-center gap-2.5"
-                  initial={{ opacity: 0, x: -12 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.7 + i * 0.08, duration: 0.4 }}
+                  transition={{ delay: 0.45 + i * 0.06, duration: 0.35 }}
                 >
                   <div className="w-4 h-4 rounded-full bg-[#1A50A0]/10 flex items-center justify-center shrink-0">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#1A50A0]" />
@@ -186,9 +189,9 @@ const HeroSection = () => {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
+              transition={{ duration: 0.4, delay: 0.6 }}
               className="mt-8 flex flex-col sm:flex-row gap-3"
             >
               <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
@@ -220,7 +223,7 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ y: imgY }}
             className="relative"
           >
@@ -231,11 +234,31 @@ const HeroSection = () => {
                 className="relative rounded-2xl overflow-hidden shadow-2xl shadow-[#1A50A0]/12"
                 style={{ transform: "translateZ(0)" }}
               >
+                {/*
+                  OTIMIZAÇÕES LCP:
+                  1. fetchpriority="high" — browser prioriza este download acima de tudo
+                  2. loading="eager" — nunca lazy na imagem hero (já estava correto)
+                  3. width/height explícitos — browser reserva espaço sem precisar baixar o arquivo
+                  4. decoding="sync" — decodifica imediatamente, sem atrasar render
+                  
+                  PRÓXIMO PASSO (fora do código):
+                  Converter hero-packaging.jpg para WebP e criar versões:
+                    hero-packaging-400.webp  (mobile)
+                    hero-packaging-800.webp  (tablet)
+                    hero-packaging-1200.webp (desktop)
+                  Depois adicionar srcset e sizes abaixo.
+                */}
                 <img
                   src={heroImg}
+                  srcSet={`${heroImg400} 400w, ${heroImg800} 800w, ${heroImg} 1200w`}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   alt="Embalagens para delivery, food service e comércio em Brasília DF"
                   className="w-full aspect-[4/3] object-cover"
                   loading="eager"
+                  fetchpriority="high"
+                  decoding="sync"
+                  width={600}
+                  height={450}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/20 to-transparent" />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm">
@@ -247,7 +270,7 @@ const HeroSection = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.4, type: "spring" }}
+                transition={{ delay: 0.7, duration: 0.4, type: "spring" }}
                 whileHover={{ y: -3, scale: 1.02 }}
                 style={{ transform: "translateZ(20px)" }}
                 className="absolute -bottom-5 -left-6 bg-white rounded-2xl shadow-xl border border-[#E8EDF5] px-4 py-3 flex items-center gap-3"
@@ -265,7 +288,7 @@ const HeroSection = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: 1.1, duration: 0.4, type: "spring" }}
+                transition={{ delay: 0.85, duration: 0.4, type: "spring" }}
                 whileHover={{ y: -3, scale: 1.02 }}
                 style={{ transform: "translateZ(20px)" }}
                 className="absolute -top-4 -right-4 bg-[#F5C200] rounded-2xl shadow-lg px-3.5 py-3 flex items-center gap-2"
