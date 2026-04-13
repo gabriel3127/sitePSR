@@ -4,7 +4,7 @@ import { Instagram, ArrowUpRight } from "lucide-react"
 import productLar from "@/assets/lar.webp"
 import productMercado from "@/assets/mercado.webp"
 import productFoodservice from "@/assets/foodservice.webp"
-import productFesta from "@/assets/product-festa.jpg"
+import productFesta from "@/assets/product-festa.webp"
 import productBio from "@/assets/bio.webp"
 import productLimpeza from "@/assets/product-limpeza.webp"
 
@@ -54,24 +54,23 @@ const PostCard = ({ post, index }) => {
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
         className="aspect-square rounded-2xl overflow-hidden relative group block"
       >
-        {/* Imagem */}
         <motion.img
           src={post.image}
           alt={post.caption}
           className="w-full h-full object-cover"
           style={{ scale: imgScale }}
           loading="lazy"
+          width={300}
+          height={300}
         />
 
-        {/* Overlay gradiente sempre presente (sutil) */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/30 to-transparent" />
-
-        {/* Overlay hover */}
         <div className="absolute inset-0 bg-[#0D1B2A]/0 group-hover:bg-[#0D1B2A]/55 transition-colors duration-300" />
 
-        {/* Conteúdo hover */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-3"
-          style={{ transform: "translateZ(12px)" }}>
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-3"
+          style={{ transform: "translateZ(12px)" }}
+        >
           <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/30">
             <Instagram className="w-4 h-4 text-white" />
           </div>
@@ -80,7 +79,6 @@ const PostCard = ({ post, index }) => {
           </p>
         </div>
 
-        {/* Borda de cor no hover */}
         <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/20 transition-colors duration-300" />
       </motion.a>
     </motion.div>
@@ -98,7 +96,6 @@ const InstagramFeed = () => (
 
     <div className="container relative">
 
-      {/* Cabeçalho */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -106,7 +103,6 @@ const InstagramFeed = () => (
         transition={{ duration: 0.5 }}
         className="text-center mb-12"
       >
-        {/* Badge Instagram */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#833ab4]/10 via-[#fd1d1d]/10 to-[#fcb045]/10 border border-[#833ab4]/15 mb-5">
           <Instagram className="w-4 h-4 text-[#833ab4]" />
           <span className="text-sm font-semibold text-[#833ab4]">@psrembalagens</span>
@@ -120,14 +116,12 @@ const InstagramFeed = () => (
         </p>
       </motion.div>
 
-      {/* Grid de posts */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3" style={{ perspective: "1000px" }}>
         {instagramPosts.map((post, i) => (
           <PostCard key={post.id} post={post} index={i} />
         ))}
       </div>
 
-      {/* CTA */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}

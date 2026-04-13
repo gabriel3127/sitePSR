@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom"
 import { ArrowRight } from "lucide-react"
 import { useRef } from "react"
-import aboutImg from "@/assets/about-estoque.jpg"
+import aboutImg from "@/assets/about-estoque.webp"
 
 const stats = [
   { value: "15+", label: "Anos no mercado", color: "#1A50A0" },
@@ -40,11 +40,13 @@ const StatCard = ({ stat, index }) => {
       whileHover={{ y: -3 }}
       className="p-5 rounded-2xl bg-white border border-[#E8EDF5] hover:border-[#1A50A0]/20 hover:shadow-lg transition-all duration-300 cursor-default relative overflow-hidden group"
     >
-      {/* Linha de cor no topo */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
-        style={{ background: stat.color === "#F5C200"
-          ? "linear-gradient(90deg, #F5C200, transparent)"
-          : "linear-gradient(90deg, #1A50A0, transparent)" }}
+      <div
+        className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+        style={{
+          background: stat.color === "#F5C200"
+            ? "linear-gradient(90deg, #F5C200, transparent)"
+            : "linear-gradient(90deg, #1A50A0, transparent)",
+        }}
       />
       <p className="text-2xl font-extrabold leading-none" style={{ color: stat.color }}>
         {stat.value}
@@ -61,24 +63,23 @@ const AboutSection = () => {
   const sectionRef = useRef(null)
   const imgRef = useRef(null)
 
-  // Parallax na imagem ao rolar
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] })
   const imgY = useTransform(scrollYProgress, [0, 1], [-30, 30])
 
   return (
     <section ref={sectionRef} id="sobre" className="py-16 md:py-28 bg-white relative overflow-hidden">
 
-      {/* Decoração */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/10 to-transparent" />
         <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/10 to-transparent" />
-        <div className="absolute -right-32 top-1/4 w-[500px] h-[500px] rounded-full opacity-[0.03]"
-          style={{ background: "radial-gradient(circle, #1A50A0, transparent)" }} />
+        <div
+          className="absolute -right-32 top-1/4 w-[500px] h-[500px] rounded-full opacity-[0.03]"
+          style={{ background: "radial-gradient(circle, #1A50A0, transparent)" }}
+        />
       </div>
 
       <div className="container relative">
 
-        {/* Grid principal */}
         <div className="grid md:grid-cols-2 gap-10 lg:gap-20 items-start">
 
           {/* Imagem com parallax */}
@@ -89,7 +90,6 @@ const AboutSection = () => {
             transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
             className="relative"
           >
-            {/* Título acima da imagem */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -105,7 +105,6 @@ const AboutSection = () => {
               </h2>
             </motion.div>
 
-            {/* Sombra deslocada decorativa */}
             <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-2xl bg-[#1A50A0]/8 blur-sm" />
 
             <div className="relative rounded-2xl overflow-hidden shadow-xl shadow-[#1A50A0]/10" ref={imgRef}>
@@ -115,12 +114,12 @@ const AboutSection = () => {
                 alt="Estoque de embalagens da PSR Embalagens no CEASA Brasília DF"
                 className="w-full aspect-[4/3] object-cover scale-110"
                 loading="lazy"
+                width={600}
+                height={450}
               />
-              {/* Overlay sutil */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/20 to-transparent" />
             </div>
 
-            {/* Badge CEASA */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -132,7 +131,6 @@ const AboutSection = () => {
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-xs font-bold text-[#0D1B2A]">CEASA · Brasília</span>
             </motion.div>
-
           </motion.div>
 
           {/* Texto + stats */}
@@ -149,7 +147,6 @@ const AboutSection = () => {
               e mantemos estoque pronto para entrega imediata — sem burocracia.
             </p>
 
-            {/* Destaques */}
             <div className="mt-6 space-y-3">
               {[
                 {
@@ -162,7 +159,10 @@ const AboutSection = () => {
                 },
               ].map((item, i) => (
                 <div key={i} className="flex gap-3 p-4 rounded-xl bg-[#F7F9FC] border border-[#E8EDF5]">
-                  <div className="w-1.5 flex-shrink-0 rounded-full bg-gradient-to-b from-[#1A50A0] to-[#F5C200] mt-1" style={{ minHeight: "100%" }} />
+                  <div
+                    className="w-1.5 flex-shrink-0 rounded-full bg-gradient-to-b from-[#1A50A0] to-[#F5C200] mt-1"
+                    style={{ minHeight: "100%" }}
+                  />
                   <div>
                     <p className="text-sm font-bold text-[#0D1B2A]">{item.title}</p>
                     <p className="text-sm text-[#718096] mt-0.5 leading-relaxed">{item.desc}</p>
@@ -171,14 +171,12 @@ const AboutSection = () => {
               ))}
             </div>
 
-            {/* Stats com tilt 3D */}
             <div className="mt-8 grid grid-cols-2 gap-3" style={{ perspective: "800px" }}>
               {stats.map((s, i) => (
                 <StatCard key={s.label} stat={s} index={i} />
               ))}
             </div>
 
-            {/* CTA catálogo */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -205,7 +203,6 @@ const AboutSection = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-20 relative"
         >
-          {/* Linha decorativa */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-px bg-gradient-to-r from-transparent via-[#1A50A0]/30 to-transparent" />
 
           <div className="max-w-2xl mx-auto text-center pt-10">

@@ -5,12 +5,11 @@ import { Link } from "react-router-dom"
 import productLar from "@/assets/lar.webp"
 import productMercado from "@/assets/mercado.webp"
 import productFoodservice from "@/assets/foodservice.webp"
-import productFesta from "@/assets/product-festa.jpg"
+import productFesta from "@/assets/product-festa.webp"
 import productLimpeza from "@/assets/product-limpeza.webp"
 import productLavanderia from "@/assets/lavanderia.webp"
 import productBio from "@/assets/bio.webp"
 
-// Slugs conforme Supabase (imagem do admin)
 const featuredProduct = {
   title: "Gastronomia",
   description: "Embalagens para restaurantes, hamburguerias, padarias, festas e todo tipo de food service. O setor que mais cresce no DF.",
@@ -89,7 +88,6 @@ const TiltCard = ({ product }) => {
         to={`/catalogo?setor=${product.setor}`}
         className="group relative bg-white rounded-2xl overflow-hidden border border-[#E8EDF5] hover:border-[#1A50A0]/20 hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
       >
-        {/* Brilho dinâmico */}
         <motion.div
           className="absolute inset-0 pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
           style={{ background: "radial-gradient(circle at 50% 50%, rgba(26,80,160,0.07) 0%, transparent 55%)" }}
@@ -102,6 +100,8 @@ const TiltCard = ({ product }) => {
             className="w-full h-full object-cover"
             style={{ scale: imgScale }}
             loading="lazy"
+            width={400}
+            height={300}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {product.tag && (
@@ -135,13 +135,14 @@ const ProductGrid = () => (
     <div className="absolute inset-0 pointer-events-none">
       <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/12 to-transparent" />
       <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/12 to-transparent" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.03]"
-        style={{ background: "radial-gradient(circle, #1A50A0 0%, transparent 70%)" }} />
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.03]"
+        style={{ background: "radial-gradient(circle, #1A50A0 0%, transparent 70%)" }}
+      />
     </div>
 
     <div className="container relative">
 
-      {/* Cabeçalho */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -161,7 +162,6 @@ const ProductGrid = () => (
         </p>
       </motion.div>
 
-      {/* Layout: 1 card grande + 6 menores */}
       <div className="flex flex-col lg:flex-row gap-5" style={{ perspective: "1200px" }}>
 
         {/* Card destaque — Gastronomia */}
@@ -179,9 +179,11 @@ const ProductGrid = () => (
             <div className="flex-1 overflow-hidden relative" style={{ minHeight: "280px" }}>
               <img
                 src={featuredProduct.image}
-                alt={featuredProduct.title}
+                alt={`Embalagens ${featuredProduct.title} - PSR Embalagens Brasília`}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 loading="lazy"
+                width={600}
+                height={420}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/50 to-transparent" />
               {featuredProduct.tag && (
@@ -201,7 +203,7 @@ const ProductGrid = () => (
           </Link>
         </motion.div>
 
-        {/* 6 cards menores — grid 2x3 */}
+        {/* 6 cards menores */}
         <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-5">
           {products.map((product, i) => (
             <motion.div
@@ -219,7 +221,6 @@ const ProductGrid = () => (
 
       </div>
 
-      {/* CTA */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
