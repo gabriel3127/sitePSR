@@ -11,30 +11,30 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Title corrigido: 55 caracteres -->
+    <!-- Title -->
     <title>PSR Embalagens | Brasília DF — Desde 2010</title>
 
     <meta name="description" content="PSR Embalagens: ampla variedade de embalagens profissionais em Brasília. Descartáveis, biodegradáveis, delivery e mais. Entrega grátis no DF. Desde 2010." />
     <meta name="author" content="PSR Embalagens" />
 
-    <!-- Open Graph -->
     <meta property="og:title" content="PSR Embalagens | Brasília DF — Desde 2010" />
     <meta property="og:description" content="Embalagens profissionais para todos os segmentos. Qualidade garantida, preços competitivos e entrega grátis no DF." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.psrembalagens.com.br/" />
+    <meta property="og:image" content="https://www.psrembalagens.com.br/og-image.jpg" />
 
-    <!-- Twitter/X Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="PSR Embalagens | Brasília DF — Desde 2010" />
     <meta name="twitter:description" content="Embalagens profissionais para todos os segmentos. Qualidade garantida, preços competitivos e entrega grátis no DF." />
 
-    <!-- Canonical -->
     <link rel="canonical" href="https://www.psrembalagens.com.br/" />
 
-    <!-- Sitemap -->
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-    <!-- Schema.org — LocalBusiness -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
+    <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -87,7 +87,6 @@
     }
     </script>
 
-    <!-- Google Analytics 4 + Google Ads -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-X2XTHETLWD"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -97,22 +96,25 @@
       gtag('config', 'AW-17515817161');
     </script>
 
-    <!-- Meta Pixel Code -->
-  <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '639456838107623');
-    fbq('track', 'PageView');
-  </script>
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '639456838107623');
+          fbq('track', 'PageView');
+        }, 3000);
+      });
+    </script>
 
-    <!-- Cloudflare Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
+
   </head>
 
   <body>
