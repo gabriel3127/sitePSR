@@ -6,10 +6,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AuthProvider } from "@/contexts/AuthContext"
 
-// Index carrega imediatamente — é a home, precisa ser rápida
 import Index from "./pages/Index.jsx"
 
-// Todas as outras rotas carregam só quando o usuário navegar até elas
 const Catalogo = lazy(() => import("./pages/Catalogo.jsx"))
 const Produto = lazy(() => import("./pages/Produto.jsx"))
 const Blog = lazy(() => import("./pages/Blog.jsx"))
