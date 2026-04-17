@@ -6,7 +6,7 @@ import Script from "next/script"
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 const GA4_ID = "G-X2XTHETLWD"
-const FB_PIXEL_ID = "639456838107623" // ← substitua pelo ID do seu Pixel
+const FB_PIXEL_ID = "639456838107623"
 
 export const metadata: Metadata = {
   title: {
@@ -65,7 +65,6 @@ export const metadata: Metadata = {
   },
 }
 
-// ─── Schema.org JSON-LD ───────────────────────────────────────────────────────
 const schemaOrg = {
   "@context": "https://schema.org",
   "@graph": [
@@ -167,32 +166,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={inter.variable}>
       <head>
-        {/* Schema.org */}
+        {/* Schema.org — sem impacto de performance */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
         />
-
-        {/* Facebook Pixel — noscript fallback */}
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none" }}
-            src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
-            alt=""
-          />
-        </noscript>
       </head>
       <body className={`${inter.className} antialiased`}>
         {children}
 
-        {/* Google Analytics GA4 */}
+        {/* GA4 — lazyOnload: só carrega após page load completo */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga4-init" strategy="afterInteractive">
+        <Script id="ga4-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -201,8 +189,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
 
-        {/* Facebook Pixel */}
-        <Script id="fb-pixel" strategy="afterInteractive">
+        {/* Facebook Pixel — lazyOnload: só carrega após page load completo */}
+        <Script id="fb-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
