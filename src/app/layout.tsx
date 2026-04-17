@@ -6,7 +6,6 @@ import Script from "next/script"
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 const GA4_ID = "G-X2XTHETLWD"
-const FB_PIXEL_ID = "639456838107623"
 
 export const metadata: Metadata = {
   title: {
@@ -16,31 +15,20 @@ export const metadata: Metadata = {
   description:
     "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno. Atendimento rápido no CEASA Brasília.",
   metadataBase: new URL("https://psrembalagens.com.br"),
-  alternates: {
-    canonical: "https://psrembalagens.com.br",
-  },
+  alternates: { canonical: "https://psrembalagens.com.br" },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     url: "https://psrembalagens.com.br",
     siteName: "PSR Embalagens",
     title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
-    description:
-      "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
-    images: [
-      {
-        url: "/images/psr-logo.svg",
-        width: 400,
-        height: 400,
-        alt: "PSR Embalagens",
-      },
-    ],
+    description: "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
+    images: [{ url: "/images/psr-logo.svg", width: 400, height: 400, alt: "PSR Embalagens" }],
   },
   twitter: {
     card: "summary",
     title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
-    description:
-      "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
+    description: "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
   },
   icons: {
     icon: [
@@ -49,19 +37,12 @@ export const metadata: Metadata = {
       { url: "/images/favicon.ico" },
     ],
     apple: "/images/apple-touch-icon.png",
-    other: [
-      { rel: "manifest", url: "/images/site.webmanifest" },
-    ],
+    other: [{ rel: "manifest", url: "/images/site.webmanifest" }],
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
 }
 
@@ -73,14 +54,8 @@ const schemaOrg = {
       "@id": "https://psrembalagens.com.br/#organization",
       name: "PSR Embalagens",
       url: "https://psrembalagens.com.br",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://psrembalagens.com.br/images/psr-logo.svg",
-      },
-      sameAs: [
-        "https://instagram.com/psrembalagens",
-        "https://facebook.com/psrembalagens",
-      ],
+      logo: { "@type": "ImageObject", url: "https://psrembalagens.com.br/images/psr-logo.svg" },
+      sameAs: ["https://instagram.com/psrembalagens", "https://facebook.com/psrembalagens"],
       contactPoint: {
         "@type": "ContactPoint",
         telephone: "+55-61-99317-7107",
@@ -93,8 +68,7 @@ const schemaOrg = {
       "@type": "LocalBusiness",
       "@id": "https://psrembalagens.com.br/#localbusiness",
       name: "PSR Embalagens",
-      description:
-        "Distribuidora de embalagens, descartáveis e produtos de limpeza para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno desde 2010.",
+      description: "Distribuidora de embalagens, descartáveis e produtos de limpeza para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno desde 2010.",
       url: "https://psrembalagens.com.br",
       telephone: "+55-61-99317-7107",
       email: "contato@psrembalagens.com.br",
@@ -109,53 +83,24 @@ const schemaOrg = {
         postalCode: "71200-030",
         addressCountry: "BR",
       },
-      geo: {
-        "@type": "GeoCoordinates",
-        latitude: -15.7942,
-        longitude: -47.9292,
-      },
+      geo: { "@type": "GeoCoordinates", latitude: -15.7942, longitude: -47.9292 },
       openingHoursSpecification: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          opens: "07:00",
-          closes: "17:00",
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: "Saturday",
-          opens: "07:00",
-          closes: "12:00",
-        },
+        { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"], opens: "07:00", closes: "17:00" },
+        { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "07:00", closes: "12:00" },
       ],
-      areaServed: [
-        { "@type": "City", name: "Brasília" },
-        { "@type": "State", name: "Distrito Federal" },
-      ],
-      hasOfferCatalog: {
-        "@type": "OfferCatalog",
-        name: "Catálogo de Embalagens e Descartáveis",
-        url: "https://psrembalagens.com.br/catalogo",
-      },
-      sameAs: [
-        "https://instagram.com/psrembalagens",
-        "https://facebook.com/psrembalagens",
-      ],
+      areaServed: [{ "@type": "City", name: "Brasília" }, { "@type": "State", name: "Distrito Federal" }],
+      hasOfferCatalog: { "@type": "OfferCatalog", name: "Catálogo de Embalagens e Descartáveis", url: "https://psrembalagens.com.br/catalogo" },
+      sameAs: ["https://instagram.com/psrembalagens", "https://facebook.com/psrembalagens"],
     },
     {
       "@type": "WebSite",
       "@id": "https://psrembalagens.com.br/#website",
       url: "https://psrembalagens.com.br",
       name: "PSR Embalagens",
-      publisher: {
-        "@id": "https://psrembalagens.com.br/#organization",
-      },
+      publisher: { "@id": "https://psrembalagens.com.br/#organization" },
       potentialAction: {
         "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: "https://psrembalagens.com.br/catalogo?q={search_term_string}",
-        },
+        target: { "@type": "EntryPoint", urlTemplate: "https://psrembalagens.com.br/catalogo?q={search_term_string}" },
         "query-input": "required name=search_term_string",
       },
     },
@@ -166,7 +111,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={inter.variable}>
       <head>
-        {/* Schema.org — sem impacto de performance */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
@@ -175,7 +119,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.className} antialiased`}>
         {children}
 
-        {/* GA4 — lazyOnload: só carrega após page load completo */}
+        {/* GA4 — lazyOnload carrega só após page load completo */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
           strategy="lazyOnload"
@@ -186,22 +130,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA4_ID}', { page_path: window.location.pathname });
-          `}
-        </Script>
-
-        {/* Facebook Pixel — lazyOnload: só carrega após page load completo */}
-        <Script id="fb-pixel" strategy="lazyOnload">
-          {`
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${FB_PIXEL_ID}');
-            fbq('track', 'PageView');
           `}
         </Script>
       </body>
