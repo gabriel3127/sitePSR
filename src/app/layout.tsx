@@ -1,19 +1,222 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
+const GA4_ID = "G-X2XTHETLWD"
+const FB_PIXEL_ID = "639456838107623" // ← substitua pelo ID do seu Pixel
+
 export const metadata: Metadata = {
-  title: "PSR Embalagens — Brasília, DF e Entorno",
+  title: {
+    default: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
+    template: "%s | PSR Embalagens",
+  },
   description:
-    "Distribuidora de embalagens em Brasília. Entrega grátis no DF e entorno, estoque pronto, sem pedido mínimo. Atendimento rápido via WhatsApp.",
+    "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno. Atendimento rápido no CEASA Brasília.",
+  metadataBase: new URL("https://psrembalagens.com.br"),
+  alternates: {
+    canonical: "https://psrembalagens.com.br",
+  },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://psrembalagens.com.br",
+    siteName: "PSR Embalagens",
+    title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
+    description:
+      "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
+    images: [
+      {
+        url: "/images/psr-logo.svg",
+        width: 400,
+        height: 400,
+        alt: "PSR Embalagens",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
+    description:
+      "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
+  },
+  icons: {
+    icon: [
+      { url: "/images/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/images/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/images/favicon.ico" },
+    ],
+    apple: "/images/apple-touch-icon.png",
+    other: [
+      { rel: "manifest", url: "/images/site.webmanifest" },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+}
+
+// ─── Schema.org JSON-LD ───────────────────────────────────────────────────────
+const schemaOrg = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://psrembalagens.com.br/#organization",
+      name: "PSR Embalagens",
+      url: "https://psrembalagens.com.br",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://psrembalagens.com.br/images/psr-logo.svg",
+      },
+      sameAs: [
+        "https://instagram.com/psrembalagens",
+        "https://facebook.com/psrembalagens",
+      ],
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+55-61-99317-7107",
+        contactType: "customer service",
+        availableLanguage: "Portuguese",
+        areaServed: "BR",
+      },
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://psrembalagens.com.br/#localbusiness",
+      name: "PSR Embalagens",
+      description:
+        "Distribuidora de embalagens, descartáveis e produtos de limpeza para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno desde 2010.",
+      url: "https://psrembalagens.com.br",
+      telephone: "+55-61-99317-7107",
+      email: "contato@psrembalagens.com.br",
+      foundingDate: "2010",
+      priceRange: "$$",
+      image: "https://psrembalagens.com.br/images/psr-logo.svg",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "CEASA — SIA Trecho 3, Lote 1.245",
+        addressLocality: "Brasília",
+        addressRegion: "DF",
+        postalCode: "71200-030",
+        addressCountry: "BR",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: -15.7942,
+        longitude: -47.9292,
+      },
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          opens: "07:00",
+          closes: "17:00",
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: "Saturday",
+          opens: "07:00",
+          closes: "12:00",
+        },
+      ],
+      areaServed: [
+        { "@type": "City", name: "Brasília" },
+        { "@type": "State", name: "Distrito Federal" },
+      ],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Catálogo de Embalagens e Descartáveis",
+        url: "https://psrembalagens.com.br/catalogo",
+      },
+      sameAs: [
+        "https://instagram.com/psrembalagens",
+        "https://facebook.com/psrembalagens",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://psrembalagens.com.br/#website",
+      url: "https://psrembalagens.com.br",
+      name: "PSR Embalagens",
+      publisher: {
+        "@id": "https://psrembalagens.com.br/#organization",
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: "https://psrembalagens.com.br/catalogo?q={search_term_string}",
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={inter.variable}>
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <head>
+        {/* Schema.org */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
+        />
+
+        {/* Facebook Pixel — noscript fallback */}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+      </head>
+      <body className={`${inter.className} antialiased`}>
+        {children}
+
+        {/* Google Analytics GA4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA4_ID}', { page_path: window.location.pathname });
+          `}
+        </Script>
+
+        {/* Facebook Pixel */}
+        <Script id="fb-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '${FB_PIXEL_ID}');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+      </body>
     </html>
   )
 }
