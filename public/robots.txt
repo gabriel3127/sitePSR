@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Bloqueia rotas de admin e vendedores
+Disallow: /admin/
+Disallow: /v/
+
+Sitemap: https://psrembalagens.com.br/sitemap.xml
