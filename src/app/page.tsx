@@ -1,21 +1,23 @@
 import type { Metadata } from "next"
 import Navbar from "@/components/Navbar"
 import HeroSection from "@/components/sections/HeroSection"
-import SocialProof from "@/components/sections/SocialProof"
-import ProductGrid from "@/components/sections/ProductGrid"
-import AboutSection from "@/components/sections/AboutSection"
-import InstagramFeed from "@/components/sections/InstagramFeed"
-import LocationSection from "@/components/sections/LocationSection"
-import ConversionSection from "@/components/sections/ConversionSection"
-import FaqSection from "@/components/sections/FaqSection"
 import Footer from "@/components/Footer"
 import WhatsAppButton from "@/components/WhatsAppButton"
 import MobileBottomNav from "@/components/MobileBottomNav"
+import {
+  SocialProof,
+  ProductGrid,
+  AboutSection,
+  InstagramFeed,
+  LocationSection,
+  ConversionSection,
+  FaqSection,
+} from "@/components/DynamicSections"
 
 export const metadata: Metadata = {
   title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
   description:
-    "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno. Atendimento rápido no CEASA Brasília.",
+    "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Veja nosso catálogo completo com entrega grátis no DF e entorno.",
   alternates: {
     canonical: "https://www.psrembalagens.com.br/",
   },
