@@ -1,6 +1,7 @@
 "use client"
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { motion } from "framer-motion"
+import { useMotionValue, useSpring, useTransform } from "framer-motion"
 import { useRef, useEffect, useState } from "react"
 import { MapPin, Truck, MessageCircle, Package } from "lucide-react"
 
@@ -8,6 +9,7 @@ import { MapPin, Truck, MessageCircle, Package } from "lucide-react"
 interface TiltCardProps {
   children: React.ReactNode
   className?: string
+  disabled?: boolean
 }
 
 interface Differential {
@@ -15,7 +17,6 @@ interface Differential {
   title: string
   desc: string
   accent: string
-  accentBg: string
   iconBg: string
 }
 
@@ -29,6 +30,19 @@ interface StatCardProps {
   stat: Stat
   index: number
   inView: boolean
+}
+
+// ─── Hook: detecta desktop ────────────────────────────────────────────────────
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)")
+    setIsDesktop(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+  return isDesktop
 }
 
 // ─── Counter animado ──────────────────────────────────────────────────────────
@@ -51,18 +65,17 @@ const useCounter = (target: string, duration = 1.5, inView: boolean) => {
   return count
 }
 
-// ─── Card com tilt 3D ─────────────────────────────────────────────────────────
-const TiltCard = ({ children, className }: TiltCardProps) => {
+// ─── Card com tilt 3D — só ativo no desktop ───────────────────────────────────
+const TiltCard = ({ children, className, disabled = false }: TiltCardProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [6, -6]), { stiffness: 300, damping: 30 })
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-6, 6]), { stiffness: 300, damping: 30 })
-  const glowX = useTransform(x, [-0.5, 0.5], [0, 100])
-  const glowY = useTransform(y, [-0.5, 0.5], [0, 100])
+  // Springs mais leves + glow radial removido (imperceptível, custoso)
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [6, -6]), { stiffness: 200, damping: 25 })
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-6, 6]), { stiffness: 200, damping: 25 })
 
   const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return
+    if (disabled || !ref.current) return
     const rect = ref.current.getBoundingClientRect()
     x.set((e.clientX - rect.left) / rect.width - 0.5)
     y.set((e.clientY - rect.top) / rect.height - 0.5)
@@ -74,15 +87,9 @@ const TiltCard = ({ children, className }: TiltCardProps) => {
       ref={ref}
       onMouseMove={handleMouse}
       onMouseLeave={handleLeave}
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      style={disabled ? {} : { rotateX, rotateY, transformStyle: "preserve-3d" }}
       className={className}
     >
-      <motion.div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-        style={{
-          background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(26,80,160,0.08) 0%, transparent 60%)`,
-        }}
-      />
       {children}
     </motion.div>
   )
@@ -95,7 +102,6 @@ const differentials: Differential[] = [
     title: "Localização Estratégica",
     desc: "Na CEASA de Brasília — no coração da distribuição do DF, garantindo agilidade e estoque sempre abastecido.",
     accent: "#1A50A0",
-    accentBg: "bg-[#1A50A0]/8",
     iconBg: "bg-[#1A50A0]",
   },
   {
@@ -103,7 +109,6 @@ const differentials: Differential[] = [
     title: "Entrega Grátis",
     desc: "Rotas diárias cobrindo todo o Distrito Federal e região do entorno sem custo adicional.",
     accent: "#F5C200",
-    accentBg: "bg-[#F5C200]/10",
     iconBg: "bg-[#F5C200]",
   },
   {
@@ -111,7 +116,6 @@ const differentials: Differential[] = [
     title: "Atendimento Direto",
     desc: "Fale com quem entende de embalagem. WhatsApp com resposta rápida e sem enrolação.",
     accent: "#1A50A0",
-    accentBg: "bg-[#1A50A0]/8",
     iconBg: "bg-[#1A50A0]",
   },
   {
@@ -119,7 +123,6 @@ const differentials: Differential[] = [
     title: "Variedade de Marcas",
     desc: "As principais marcas do mercado — descartáveis, biodegradáveis, food service e muito mais.",
     accent: "#F5C200",
-    accentBg: "bg-[#F5C200]/10",
     iconBg: "bg-[#F5C200]",
   },
 ]
@@ -130,7 +133,7 @@ const stats: Stat[] = [
   { value: "4.9", label: "estrelas no Google", suffix: "★" },
 ]
 
-// ─── Stat counter card ────────────────────────────────────────────────────────
+// ─── Stat counter card — hover via CSS, sem whileHover ───────────────────────
 const StatCard = ({ stat, index, inView }: StatCardProps) => {
   const count = useCounter(stat.value, 1.5, inView)
   const isRating = stat.value.includes(".")
@@ -144,8 +147,8 @@ const StatCard = ({ stat, index, inView }: StatCardProps) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -4 }}
-      className="text-center p-6 rounded-2xl bg-white border border-[#E8EDF5] shadow-sm hover:shadow-md transition-all duration-300"
+      className="text-center p-6 rounded-2xl bg-white border border-[#E8EDF5] shadow-sm
+                 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
     >
       <p className="text-4xl font-extrabold text-[#0D1B2A] leading-none tabular-nums">
         {displayed}
@@ -163,6 +166,7 @@ const StatCard = ({ stat, index, inView }: StatCardProps) => {
 const SocialProof = () => {
   const [statsInView, setStatsInView] = useState(false)
   const statsRef = useRef<HTMLDivElement>(null)
+  const isDesktop = useIsDesktop()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -195,6 +199,7 @@ const SocialProof = () => {
           </h2>
         </motion.div>
 
+        {/* Grid de diferenciais — tilt só no desktop */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16" style={{ perspective: "1000px" }}>
           {differentials.map((d, i) => (
             <motion.div
@@ -204,13 +209,21 @@ const SocialProof = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <TiltCard className="group relative p-6 rounded-2xl bg-white border border-[#E8EDF5] hover:border-[#1A50A0]/20 hover:shadow-lg transition-all duration-300 cursor-default h-full overflow-hidden">
+              <TiltCard
+                disabled={!isDesktop}
+                className="group relative p-6 rounded-2xl bg-white border border-[#E8EDF5]
+                           hover:border-[#1A50A0]/20 hover:shadow-lg transition-all duration-300
+                           cursor-default h-full overflow-hidden"
+              >
+                {/* Linha top — CSS transition, sem motion */}
                 <div
-                  className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl opacity-0
+                              group-hover:opacity-100 transition-opacity duration-300"
                   style={{ background: `linear-gradient(90deg, ${d.accent}, transparent)` }}
                 />
                 <div
-                  className={`w-12 h-12 rounded-xl ${d.iconBg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
+                  className={`w-12 h-12 rounded-xl ${d.iconBg} flex items-center justify-center mb-4
+                              group-hover:scale-110 transition-transform duration-300`}
                   style={{ transform: "translateZ(8px)" }}
                 >
                   <d.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
@@ -227,6 +240,7 @@ const SocialProof = () => {
           ))}
         </div>
 
+        {/* Stats */}
         <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {stats.map((stat, i) => (
             <StatCard key={stat.label} stat={stat} index={i} inView={statsInView} />

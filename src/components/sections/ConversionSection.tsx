@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 import { ArrowRight, Send, MessageCircle, Star, Clock } from "lucide-react"
 
@@ -18,21 +18,35 @@ const ramos = [
   "Farmácia / Drogaria",
 ]
 
+// ─── Hook: detecta desktop ────────────────────────────────────────────────────
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)")
+    setIsDesktop(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+  return isDesktop
+}
+
 interface SideCardProps {
   children: React.ReactNode
   index: number
+  disabled?: boolean
 }
 
-// ─── Card lateral com tilt 3D ─────────────────────────────────────────────────
-const SideCard = ({ children, index }: SideCardProps) => {
+// ─── Card lateral — tilt só no desktop ───────────────────────────────────────
+const SideCard = ({ children, index, disabled = false }: SideCardProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [4, -4]), { stiffness: 300, damping: 30 })
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-4, 4]), { stiffness: 300, damping: 30 })
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [4, -4]), { stiffness: 200, damping: 25 })
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-4, 4]), { stiffness: 200, damping: 25 })
 
   const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return
+    if (disabled || !ref.current) return
     const rect = ref.current.getBoundingClientRect()
     x.set((e.clientX - rect.left) / rect.width - 0.5)
     y.set((e.clientY - rect.top) / rect.height - 0.5)
@@ -44,7 +58,7 @@ const SideCard = ({ children, index }: SideCardProps) => {
       ref={ref}
       onMouseMove={handleMouse}
       onMouseLeave={handleLeave}
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      style={disabled ? {} : { rotateX, rotateY, transformStyle: "preserve-3d" }}
       initial={{ opacity: 0, x: 20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
@@ -60,6 +74,7 @@ const SideCard = ({ children, index }: SideCardProps) => {
 const ConversionSection = () => {
   const [form, setForm] = useState({ nome: "", telefone: "", ramo: "", mensagem: "" })
   const [focused, setFocused] = useState<string | null>(null)
+  const isDesktop = useIsDesktop()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -181,21 +196,23 @@ const ConversionSection = () => {
               className={`${inputClass("msg")} resize-none min-h-[340px]`}
             />
 
-            <motion.button
+            {/* Botão — whileHover/whileTap só no desktop, CSS no mobile */}
+            <button
               type="submit"
-              whileHover={{ scale: 1.01, y: -1 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#1A50A0] hover:bg-[#153F80] text-white font-bold transition-colors shadow-lg shadow-[#1A50A0]/30"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl
+                         bg-[#1A50A0] hover:bg-[#153F80] active:scale-[0.98] text-white font-bold
+                         transition-all duration-200 shadow-lg shadow-[#1A50A0]/30
+                         md:hover:-translate-y-px"
             >
               <Send className="w-4 h-4" />
               Enviar via WhatsApp
-            </motion.button>
+            </button>
           </motion.form>
 
           {/* Cards laterais — 2/5 */}
           <div className="flex flex-col gap-4 md:col-span-2" style={{ perspective: "800px" }}>
 
-            <SideCard index={0}>
+            <SideCard index={0} disabled={!isDesktop}>
               <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="group block">
                 <div className="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center mb-4">
                   <MessageCircle className="w-5 h-5 text-green-400" />
@@ -208,7 +225,7 @@ const ConversionSection = () => {
               </a>
             </SideCard>
 
-            <SideCard index={1}>
+            <SideCard index={1} disabled={!isDesktop}>
               <div className="w-10 h-10 rounded-xl bg-[#1A50A0]/30 flex items-center justify-center mb-4">
                 <Clock className="w-5 h-5 text-[#6B9FE4]" />
               </div>
@@ -221,7 +238,7 @@ const ConversionSection = () => {
               </div>
             </SideCard>
 
-            <SideCard index={2}>
+            <SideCard index={2} disabled={!isDesktop}>
               <div className="w-10 h-10 rounded-xl bg-[#F5C200]/15 flex items-center justify-center mb-4">
                 <Star className="w-5 h-5 text-[#F5C200] fill-[#F5C200]" />
               </div>

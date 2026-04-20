@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, Minus, MessageCircle } from "lucide-react"
 
 const WA_LINK = "https://wa.me/5561993177107?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20personalizado.%20Podem%20me%20ajudar?"
@@ -16,6 +16,7 @@ interface FaqItemProps {
   index: number
   isOpen: boolean
   onToggle: () => void
+  isDesktop: boolean
 }
 
 const faqs: Faq[] = [
@@ -46,12 +47,13 @@ const faqs: Faq[] = [
 ]
 
 // ─── Item FAQ ─────────────────────────────────────────────────────────────────
-const FaqItem = ({ faq, index, isOpen, onToggle }: FaqItemProps) => (
+const FaqItem = ({ faq, index, isOpen, onToggle, isDesktop }: FaqItemProps) => (
   <motion.div
     initial={{ opacity: 0, y: 12 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    transition={{ duration: 0.4, delay: index * 0.07 }}
+    // Delay escalonado só no desktop — no mobile todos entram juntos
+    transition={{ duration: 0.4, delay: isDesktop ? index * 0.07 : 0 }}
     className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
       isOpen
         ? "border-[#1A50A0]/25 bg-white shadow-md shadow-[#1A50A0]/8"
@@ -96,6 +98,16 @@ const FaqItem = ({ faq, index, isOpen, onToggle }: FaqItemProps) => (
 // ═══════════════════════════════════════════════════════════════════════════════
 const FaqSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)")
+    setIsDesktop(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+
   const toggle = (i: number) => setOpenIndex(prev => prev === i ? null : i)
 
   return (
@@ -132,6 +144,7 @@ const FaqSection = () => {
               index={i}
               isOpen={openIndex === i}
               onToggle={() => toggle(i)}
+              isDesktop={isDesktop}
             />
           ))}
         </div>
@@ -144,17 +157,18 @@ const FaqSection = () => {
           className="mt-10 text-center"
         >
           <p className="text-[#718096] mb-5 text-sm">Não encontrou a resposta que procurava?</p>
-          <motion.a
+          {/* motion.a → <a> com CSS — sem instância Framer num link externo */}
+          <a
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.02, y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#1A50A0] text-white font-semibold hover:bg-[#153F80] transition-colors shadow-lg shadow-[#1A50A0]/25"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#1A50A0] text-white
+                       font-semibold hover:bg-[#153F80] active:scale-[0.98] transition-all duration-200
+                       shadow-lg shadow-[#1A50A0]/25 hover:-translate-y-px"
           >
             <MessageCircle className="w-4 h-4" />
             Fale Conosco no WhatsApp
-          </motion.a>
+          </a>
         </motion.div>
       </div>
     </section>
