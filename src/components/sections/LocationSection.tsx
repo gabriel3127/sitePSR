@@ -1,8 +1,7 @@
 "use client"
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
-import { useRef } from "react"
-import { MapPin, Clock, Phone, Navigation } from "lucide-react"
+import { motion } from "framer-motion"
+import { MapPin, Clock, Phone, Navigation, ExternalLink } from "lucide-react"
 
 interface InfoCardProps {
   icon: React.ElementType
@@ -12,58 +11,100 @@ interface InfoCardProps {
   accent?: string
 }
 
-// ─── Info card com tilt 3D ────────────────────────────────────────────────────
-const InfoCard = ({ icon: Icon, title, children, index, accent = "#1A50A0" }: InfoCardProps) => {
-  const ref = useRef<HTMLDivElement>(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [4, -4]), { stiffness: 300, damping: 30 })
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-4, 4]), { stiffness: 300, damping: 30 })
-
-  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return
-    const rect = ref.current.getBoundingClientRect()
-    x.set((e.clientX - rect.left) / rect.width - 0.5)
-    y.set((e.clientY - rect.top) / rect.height - 0.5)
-  }
-  const handleLeave = () => { x.set(0); y.set(0) }
-
-  return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouse}
-      onMouseLeave={handleLeave}
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-      initial={{ opacity: 0, x: 24 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-      whileHover={{ y: -2 }}
-      className="group p-6 rounded-2xl bg-white border border-[#E8EDF5] hover:border-[#1A50A0]/20 hover:shadow-lg transition-all duration-300 relative overflow-hidden cursor-default"
-    >
+const InfoCard = ({ icon: Icon, title, children, index, accent = "#1A50A0" }: InfoCardProps) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
+    className="group p-5 rounded-2xl bg-white border border-[#E8EDF5] hover:border-[#1A50A0]/20 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
+  >
+    <div
+      className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"
+      style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
+    />
+    <div className="flex items-start gap-4">
       <div
-        className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"
-        style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
-      />
-      <div className="flex items-start gap-4">
-        <div
-          className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300"
-          style={{ background: accent === "#F5C200" ? "#F5C200" : "#1A50A0", transform: "translateZ(6px)" }}
-        >
-          <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
-        </div>
-        <div style={{ transform: "translateZ(4px)" }}>
-          <h3 className="font-bold text-[#0D1B2A] text-base leading-snug">{title}</h3>
-          <div className="mt-1.5">{children}</div>
-        </div>
+        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: accent === "#F5C200" ? "#F5C200" : "#1A50A0" }}
+      >
+        <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
       </div>
-    </motion.div>
-  )
-}
+      <div className="min-w-0 flex-1">
+        <h3 className="font-bold text-[#0D1B2A] text-sm leading-snug">{title}</h3>
+        <div className="mt-1">{children}</div>
+      </div>
+    </div>
+  </motion.div>
+)
+
+const GMAPS_LINK = "https://maps.app.goo.gl/si3YPWmrvmkxojZC6"
+const WAZE_LINK  = "https://waze.com/ul?ll=-15.7886105,-47.946408&navigate=yes"
+
+const StaticMap = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+    className="rounded-2xl overflow-hidden border border-[#E8EDF5] shadow-lg shadow-[#1A50A0]/8"
+  >
+    {/* Imagem do mapa */}
+    <div className="relative w-full h-56 sm:h-72 md:h-80 overflow-hidden">
+      <img
+        src="/images/mapa-psr.webp"
+        alt="Mapa de localização da PSR Embalagens no CEASA Brasília"
+        className="w-full h-full object-cover object-center"
+        loading="lazy"
+      />
+
+      {/* Overlay hover — desktop only */}
+      <a
+        href={GMAPS_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Abrir localização no Google Maps"
+        className="absolute inset-0 hidden md:flex items-center justify-center bg-black/0 hover:bg-black/15 transition-colors duration-300 group"
+      >
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-[#1A50A0] text-sm font-semibold px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+          <ExternalLink className="w-4 h-4" /> Ver no Google Maps
+        </span>
+      </a>
+
+      {/* Badge — canto superior esquerdo */}
+      <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm rounded-xl shadow-md px-3 py-1.5 flex items-center gap-2 border border-[#E8EDF5] pointer-events-none">
+        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+        <span className="text-xs font-bold text-[#0D1B2A] whitespace-nowrap">PSR Embalagens · CEASA</span>
+      </div>
+    </div>
+
+    {/* Barra de ações — abaixo do mapa, sempre visível, fácil de tocar */}
+    <div className="bg-white border-t border-[#E8EDF5] grid grid-cols-2 divide-x divide-[#E8EDF5]">
+      <a
+        href={GMAPS_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 py-4 text-sm font-bold text-[#1A50A0] hover:bg-[#F0F4FB] active:bg-[#E8EDF5] transition-colors duration-150"
+      >
+        <Navigation className="w-4 h-4 shrink-0" />
+        Google Maps
+      </a>
+      <a
+        href={WAZE_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 py-4 text-sm font-bold text-[#6B4EFF] hover:bg-[#F5F3FF] active:bg-[#EDE9FE] transition-colors duration-150"
+      >
+        <Navigation className="w-4 h-4 shrink-0" />
+        Waze
+      </a>
+    </div>
+  </motion.div>
+)
 
 // ═══════════════════════════════════════════════════════════════════════════════
 const LocationSection = () => (
-  <section id="localizacao" className="py-16 md:py-24 bg-white relative overflow-hidden">
+  <section id="localizacao" className="py-12 md:py-24 bg-white relative overflow-hidden">
     <div className="absolute inset-0 pointer-events-none">
       <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/10 to-transparent" />
       <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-[#1A50A0]/10 to-transparent" />
@@ -74,64 +115,30 @@ const LocationSection = () => (
     </div>
 
     <div className="container relative">
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="mb-12"
+        className="mb-8 md:mb-12"
       >
-        <p className="text-sm font-semibold text-[#1A50A0] tracking-widest uppercase mb-3">
+        <p className="text-xs font-semibold text-[#1A50A0] tracking-widest uppercase mb-2">
           Nossa Localização
         </p>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] leading-tight">
+        <h2 className="text-2xl md:text-4xl font-extrabold text-[#0D1B2A] leading-tight">
           Visite nossa loja no CEASA
         </h2>
-        <p className="mt-2 text-[#718096]">
+        <p className="mt-1.5 text-sm md:text-base text-[#718096]">
           Localização estratégica para atendimento rápido em todo o DF
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-8 items-start">
+      {/* Mobile: mapa em cima, cards abaixo. Desktop: lado a lado */}
+      <div className="flex flex-col md:grid md:grid-cols-2 gap-5 md:gap-8 items-start">
+        <StaticMap />
 
-        {/* Mapa */}
-        <motion.div
-          initial={{ opacity: 0, x: -24 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="relative"
-        >
-          <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-2xl bg-[#1A50A0]/8 blur-sm" />
-          <div
-            className="relative rounded-2xl overflow-hidden shadow-xl shadow-[#1A50A0]/10 border border-[#E8EDF5]"
-            style={{ minHeight: "420px" }}
-          >
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3838.5!2d-47.946408!3d-15.7886105!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935a311d2a52c945%3A0x3495b53058238b45!2sPSR%20Embalagens!5e0!3m2!1spt-BR!2sbr!4v1"
-              width="100%"
-              height="420"
-              style={{ border: 0, display: "block" }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Localização PSR Embalagens no CEASA Brasília"
-            />
-          </div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5, type: "spring" }}
-            className="absolute bottom-4 left-4 bg-white rounded-xl shadow-lg px-4 py-2.5 flex items-center gap-2 border border-[#E8EDF5]"
-          >
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs font-bold text-[#0D1B2A]">PSR Embalagens · CEASA</span>
-          </motion.div>
-        </motion.div>
-
-        {/* Cards de info */}
-        <div className="space-y-3" style={{ perspective: "800px" }}>
+        <div className="space-y-3">
           <InfoCard icon={MapPin} title="Endereço" index={0}>
             <p className="text-sm text-[#718096] leading-relaxed">
               SIA Trecho 10, LOTE 05, PAV B-10B, BOX 07<br />
@@ -139,10 +146,10 @@ const LocationSection = () => (
               CEP: 71200-100
             </p>
             <a
-              href="https://maps.app.goo.gl/si3YPWmrvmkxojZC6"
+              href={GMAPS_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 mt-2.5 text-sm font-semibold text-[#1A50A0] hover:underline"
+              className="inline-flex items-center gap-1.5 mt-2 text-sm font-semibold text-[#1A50A0] hover:underline"
             >
               <Navigation className="w-3.5 h-3.5" /> Abrir no Google Maps
             </a>
