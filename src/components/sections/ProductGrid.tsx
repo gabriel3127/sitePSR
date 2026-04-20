@@ -62,7 +62,7 @@ const TiltCard = ({ product }: TiltCardProps) => {
       className="h-full"
     >
       <Link
-        href={`/catalogo?setor=${product.setor}`}
+        href={`/catalogo/setor/${product.setor}`}
         className="group relative bg-white rounded-2xl overflow-hidden border border-[#E8EDF5] hover:border-[#1A50A0]/20 hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
       >
         <motion.div
@@ -157,7 +157,7 @@ const ProductGrid = () => (
           className="lg:w-[38%] flex-shrink-0"
         >
           <Link
-            href={`/catalogo?setor=${featuredProduct.setor}`}
+            href={`/catalogo/setor/${featuredProduct.setor}`}
             className="group relative bg-white rounded-2xl overflow-hidden border border-[#E8EDF5] hover:border-[#1A50A0]/20 hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
           >
             {/* Mobile: imagem com overlay e texto sobreposto */}
