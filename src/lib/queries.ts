@@ -68,10 +68,34 @@ export async function getProdutoById(id: number): Promise<ProdutoComRelacoes | n
   return data as ProdutoComRelacoes
 }
 
-export async function getProdutosSlugs(): Promise<{ id: number }[]> {
+// Nova função — busca por slug
+export async function getProdutoBySlug(slug: string): Promise<ProdutoComRelacoes | null> {
   const { data, error } = await supabase
     .from('produtos')
-    .select('id')
+    .select(`
+      *,
+      categorias:categoria_id (id, nome, slug),
+      subcategorias:subcategoria_id (id, nome, slug),
+      produto_setores (
+        setores (id, nome, slug)
+      )
+    `)
+    .eq('slug', slug)
+    .single()
+
+  if (error) {
+    console.error('Erro ao buscar produto por slug:', error)
+    return null
+  }
+
+  return data as ProdutoComRelacoes
+}
+
+// Atualizado — retorna slug em vez de id para generateStaticParams
+export async function getProdutosSlugs(): Promise<{ slug: string }[]> {
+  const { data, error } = await supabase
+    .from('produtos')
+    .select('slug')
     .eq('ativo', true)
 
   if (error) return []
