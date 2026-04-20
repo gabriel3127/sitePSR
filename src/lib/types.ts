@@ -48,6 +48,7 @@ export type Variacoes = {
 
 export type Produto = {
   id: number
+  slug: string          // ← adicionado (coluna criada pela migration)
   nome: string
   descricao: string | null
   foto_url: string | null
