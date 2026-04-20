@@ -110,24 +110,21 @@ const schemaOrg = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={inter.variable}>
-      {/* ← sem <head> aqui */}
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
+        />
+      </head>
       <body className={`${inter.className} antialiased`}>
         {children}
 
-        {/* Schema.org movido para cá */}
-        <Script
-          id="schema-org"
-          type="application/ld+json"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
-        />
-
-        {/* GA4 */}
+        {/* GA4 — lazyOnload carrega só após page load completo */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga4-init" strategy="afterInteractive">
+        <Script id="ga4-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
