@@ -26,7 +26,7 @@ const Footer = () => {
               <Link href="/catalogo" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Catálogo</Link>
               <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
               <Link href="/depoimentos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Depoimentos</Link>
-              <Link href="/links" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Link na Bio</Link>
+              <Link href="/links" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Links</Link>
             </div>
           </div>
 
