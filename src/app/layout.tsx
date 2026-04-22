@@ -37,8 +37,10 @@ export const metadata: Metadata = {
       { url: "/images/favicon.ico" },
     ],
     apple: "/images/apple-touch-icon.png",
-    other: [{ rel: "manifest", url: "/images/site.webmanifest" }],
   },
+  
+  manifest: "/site.webmanifest",
+  
   robots: {
     index: true,
     follow: true,
