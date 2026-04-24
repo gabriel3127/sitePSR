@@ -160,31 +160,42 @@ const Seletores = ({ grupos, combinacoes, selecoes, onSelect }: SeletoresProps) 
   )
 }
 
-// ─── Card produto relacionado ─────────────────────────────────────────────────
-const RelatedCard = ({ product }: { product: ProdutoComRelacoes }) => (
-  <Link href={`/catalogo/${product.id}`}
-    className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-    <div className="aspect-square overflow-hidden bg-gray-50 relative">
-      {product.foto_url ? (
-        <Image src={product.foto_url} alt={product.nome} fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          sizes="(max-width: 768px) 50vw, 25vw" />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center text-gray-200">
-          <ShoppingBag className="w-8 h-8" />
+  const RelatedCard = ({ product }: { product: ProdutoComRelacoes }) => {
+    const href = `/catalogo/p/${product.slug ?? product.id}`
+
+    return (
+      <Link
+        href={href}
+        className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+      >
+        <div className="aspect-square overflow-hidden bg-gray-50 relative">
+          {product.foto_url ? (
+            <Image
+              src={product.foto_url}
+              alt={product.nome}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 50vw, 25vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-200">
+              <ShoppingBag className="w-8 h-8" />
+            </div>
+          )}
         </div>
-      )}
-    </div>
-    <div className="p-3">
-      {product.categorias && (
-        <span className="text-[10px] font-bold text-[#1A50A0] uppercase tracking-wider">{product.categorias.nome}</span>
-      )}
-      <h3 className="font-semibold text-gray-900 text-sm mt-0.5 leading-snug line-clamp-2 group-hover:text-[#1A50A0] transition-colors">
-        {product.nome}
-      </h3>
-    </div>
-  </Link>
-)
+        <div className="p-3">
+          {product.categorias && (
+            <span className="text-[10px] font-bold text-[#1A50A0] uppercase tracking-wider">
+              {product.categorias.nome}
+            </span>
+          )}
+          <h3 className="font-semibold text-gray-900 text-sm mt-0.5 leading-snug line-clamp-2 group-hover:text-[#1A50A0] transition-colors">
+            {product.nome}
+          </h3>
+        </div>
+      </Link>
+    )
+  }
 
   const Footer = () => (
     <footer className="bg-gray-950 text-gray-400 mt-16">
@@ -398,6 +409,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
   const relacionados = todosProdutos
     .filter(p => p.id !== produto.id && p.produto_setores?.some(ps => setorSlugs.includes(ps.setores?.slug)))
     .slice(0, 4)
+
   const setorNome = produto.produto_setores?.[0]?.setores?.nome
 
   return (
