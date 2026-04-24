@@ -15,7 +15,9 @@ export const metadata: Metadata = {
   description:
     "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno. Atendimento rápido no CEASA Brasília.",
   metadataBase: new URL("https://psrembalagens.com.br"),
-  alternates: { canonical: "https://psrembalagens.com.br" },
+  alternates: { 
+    canonical: "/", // This will correctly resolve to https://psrembalagens.com.br/
+  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -23,12 +25,21 @@ export const metadata: Metadata = {
     siteName: "PSR Embalagens",
     title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
     description: "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
-    images: [{ url: "/images/psr-logo.svg", width: 400, height: 400, alt: "PSR Embalagens" }],
+    images: [
+      { 
+        // TIP: Convert your logo to PNG for social sharing. SVGs are rarely supported by social crawlers.
+        url: "/images/og-image.png", 
+        width: 1200, 
+        height: 630, 
+        alt: "PSR Embalagens" 
+      }
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
     description: "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
+    images: ["/images/og-image.png"],
   },
   icons: {
     icon: [
@@ -38,9 +49,7 @@ export const metadata: Metadata = {
     ],
     apple: "/images/apple-touch-icon.png",
   },
-  
   manifest: "/site.webmanifest",
-  
   robots: {
     index: true,
     follow: true,
@@ -112,21 +121,21 @@ const schemaOrg = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={inter.variable}>
-      <head>
+      <body className={`${inter.className} antialiased`}>
+        {/* JSON-LD Schema inside the body is better for hydration in some Next.js versions */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
         />
-      </head>
-      <body className={`${inter.className} antialiased`}>
+        
         {children}
 
-        {/* GA4 — lazyOnload carrega só após page load completo */}
+        {/* GA4 — 'afterInteractive' is usually preferred over 'lazyOnload' for analytics accuracy */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
-        <Script id="ga4-init" strategy="lazyOnload">
+        <Script id="ga4-init" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}

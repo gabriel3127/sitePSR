@@ -44,7 +44,7 @@ const Navbar = () => {
             src="/images/psr-logo.svg"
             alt="PSR Embalagens"
             width={40}
-            height={40}
+            height={40} 
             className="h-10 w-auto"
             priority
           />
