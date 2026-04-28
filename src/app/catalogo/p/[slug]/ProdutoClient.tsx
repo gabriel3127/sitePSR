@@ -41,7 +41,7 @@ const Lightbox = ({ images, startIndex, onClose }: { images: string[]; startInde
     <AnimatePresence>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4" onClick={onClose}>
-        <button onClick={onClose}
+        <button onClick={onClose} aria-label="Fechar lightbox"
           className="absolute top-5 right-5 text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2.5 transition-colors z-10">
           <X className="w-5 h-5" />
         </button>
@@ -51,18 +51,20 @@ const Lightbox = ({ images, startIndex, onClose }: { images: string[]; startInde
           onClick={e => e.stopPropagation()} />
         {images.length > 1 && (
           <>
-            <button onClick={e => { e.stopPropagation(); prev() }}
+            <button onClick={e => { e.stopPropagation(); prev() }} aria-label="Imagem anterior"
               className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button onClick={e => { e.stopPropagation(); next() }}
+            <button onClick={e => { e.stopPropagation(); next() }} aria-label="Próxima imagem"
               className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors">
               <ChevronRight className="w-5 h-5" />
             </button>
             <div className="absolute bottom-5 flex gap-1.5">
               {images.map((_, i) => (
-                <button key={i} onClick={e => { e.stopPropagation(); setCurrent(i) }}
-                  className={`rounded-full transition-all ${i === current ? "w-5 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40"}`} />
+                <button key={i} onClick={e => { e.stopPropagation(); setCurrent(i) }} aria-label={`Ver imagem ${i + 1}`}
+                  className="p-2 flex items-center justify-center">
+                  <span className={`rounded-full transition-all block ${i === current ? "w-5 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40"}`} />
+                </button>
               ))}
             </div>
           </>
@@ -205,23 +207,23 @@ const Seletores = ({ grupos, combinacoes, selecoes, onSelect }: SeletoresProps) 
             <div className="mb-4">
               <Image src="/images/psr-logo.svg" alt="PSR Embalagens" width={90} height={32} className="h-8 w-auto brightness-0 invert opacity-70" />
             </div>
-            <p className="text-sm leading-relaxed text-gray-500 mb-5">
+            <p className="text-sm leading-relaxed text-gray-400 mb-5">
               Embalagens, descartáveis e produtos de limpeza para o seu negócio. Qualidade e variedade em um só lugar.
             </p>
             <div className="flex gap-3">
-              <a href="https://instagram.com/psrembalagens" target="_blank" rel="noopener noreferrer"
+              <a href="https://instagram.com/psrembalagens" target="_blank" rel="noopener noreferrer" aria-label="Instagram PSR Embalagens"
                 className="w-9 h-9 rounded-full border border-gray-800 flex items-center justify-center hover:border-gray-600 hover:text-gray-200 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
                 </svg>
               </a>
-              <a href="https://facebook.com/psrembalagens" target="_blank" rel="noopener noreferrer"
+              <a href="https://facebook.com/psrembalagens" target="_blank" rel="noopener noreferrer" aria-label="Facebook PSR Embalagens"
                 className="w-9 h-9 rounded-full border border-gray-800 flex items-center justify-center hover:border-gray-600 hover:text-gray-200 transition-colors">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                 </svg>
               </a>
-              <a href="https://youtube.com/@psrembalagens" target="_blank" rel="noopener noreferrer"
+              <a href="https://youtube.com/@psrembalagens" target="_blank" rel="noopener noreferrer" aria-label="YouTube PSR Embalagens"
                 className="w-9 h-9 rounded-full border border-gray-800 flex items-center justify-center hover:border-gray-600 hover:text-gray-200 transition-colors">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
@@ -233,7 +235,7 @@ const Seletores = ({ grupos, combinacoes, selecoes, onSelect }: SeletoresProps) 
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-300 mb-4">Institucional</p>
             <ul className="space-y-2.5">
               {["Sobre nós", "Política de privacidade", "Termos de uso", "Trabalhe conosco"].map(item => (
-                <li key={item}><Link href="#" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">{item}</Link></li>
+                <li key={item}><Link href="#" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">{item}</Link></li>
               ))}
             </ul>
           </div>
@@ -241,24 +243,24 @@ const Seletores = ({ grupos, combinacoes, selecoes, onSelect }: SeletoresProps) 
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-300 mb-4">Atendimento</p>
             <ul className="space-y-2.5">
               {["Central de ajuda", "Rastrear pedido", "Trocas e devoluções", "Fale conosco"].map(item => (
-                <li key={item}><Link href="#" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">{item}</Link></li>
+                <li key={item}><Link href="#" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">{item}</Link></li>
               ))}
             </ul>
           </div>
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-300 mb-4">Contato</p>
             <ul className="space-y-3">
-              <li className="flex items-start gap-2.5 text-sm text-gray-500">
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-600" />
+              <li className="flex items-start gap-2.5 text-sm text-gray-400">
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-500" />
                 <span>SIA Trecho 3, Lote 1.245 — Brasília, DF</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 flex-shrink-0 text-gray-600" />
-                <a href="tel:+5561993177107" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">(61) 99317-7107</a>
+                <Phone className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                <a href="tel:+5561993177107" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">(61) 99317-7107</a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 flex-shrink-0 text-gray-600" />
-                <a href="mailto:contato@psrembalagens.com.br" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">contato@psrembalagens.com.br</a>
+                <Mail className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                <a href="mailto:contato@psrembalagens.com.br" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">contato@psrembalagens.com.br</a>
               </li>
             </ul>
           </div>
@@ -269,7 +271,7 @@ const Seletores = ({ grupos, combinacoes, selecoes, onSelect }: SeletoresProps) 
           <p className="text-xs text-gray-600">© {new Date().getFullYear()} PSR Embalagens. Todos os direitos reservados.</p>
           <div className="flex gap-4">
             {["Privacidade", "Cookies", "Termos"].map(item => (
-              <Link key={item} href="#" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">{item}</Link>
+              <Link key={item} href="#" className="text-xs text-gray-500 hover:text-gray-200 transition-colors">{item}</Link>
             ))}
           </div>
         </div>
@@ -437,7 +439,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
       <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
         <div className="container h-14 flex items-center justify-between gap-4">
           {/* Voltar */}
-          <Link href="/catalogo"
+          <Link href="/catalogo" aria-label="Voltar ao catálogo"
             className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
             <ChevronLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Voltar ao catálogo</span>
@@ -449,7 +451,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
           </Link>
 
           {/* Carrinho */}
-          <button onClick={() => { refreshCart(); setCartOpen(true) }}
+          <button onClick={() => { refreshCart(); setCartOpen(true) }} aria-label="Abrir carrinho"
             className="flex items-center gap-2 pl-3 pr-4 py-2 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 transition-all relative">
             <div className="relative">
               <ShoppingBag className="w-4 h-4" />
@@ -469,17 +471,17 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
         </div>
       </header>
 
-      <div className="container py-6 max-w-6xl">
+      <main className="container py-6 max-w-6xl">
 
-         <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-6">
-          <Link href="/catalogo" className="hover:text-gray-700 transition-colors">Catálogo</Link>
+         <nav className="flex items-center gap-1.5 text-xs text-gray-600 mb-6">
+          <Link href="/catalogo" className="hover:text-gray-900 transition-colors">Catálogo</Link>
 
           {breadcrumb && (
             <>
               <ChevronRight className="w-3 h-3" />
               <Link
                 href={`/catalogo?${breadcrumb.tipo}=${breadcrumb.slug}`}
-                className="hover:text-gray-700 transition-colors"
+                className="hover:text-gray-900 transition-colors"
               >
                 {breadcrumb.nome}
               </Link>
@@ -537,14 +539,16 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
               {imagens.length > 1 && (
                 <div className="flex justify-center gap-1.5 mt-3">
                   {imagens.map((_, i) => (
-                    <button key={i}
+                    <button key={i} aria-label={`Ver imagem ${i + 1}`}
                       onClick={() => {
                         carouselRef.current?.scrollTo({ left: i * (carouselRef.current?.offsetWidth ?? 0), behavior: "smooth" })
                         setActiveImg(i)
                       }}
-                      className={`rounded-full transition-all duration-300 ${
+                      className="p-2 flex items-center justify-center">
+                      <span className={`rounded-full transition-all duration-300 block ${
                         imgExibida === i ? "w-5 h-1.5 bg-[#1A50A0]" : "w-1.5 h-1.5 bg-gray-300"
                       }`} />
+                    </button>
                   ))}
                 </div>
               )}
@@ -582,20 +586,20 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
               {imagens.length > 1 && (
                 <div className="relative mt-3 group/carousel">
                   {activeImg > 0 && (
-                    <button onClick={() => setActiveImg(i => Math.max(0, i - 1))}
+                    <button onClick={() => setActiveImg(i => Math.max(0, i - 1))} aria-label="Imagem anterior"
                       className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50 transition-all opacity-0 group-hover/carousel:opacity-100">
                       <ChevronLeft className="w-4 h-4 text-gray-600" />
                     </button>
                   )}
                   {activeImg < imagens.length - 1 && (
-                    <button onClick={() => setActiveImg(i => Math.min(imagens.length - 1, i + 1))}
+                    <button onClick={() => setActiveImg(i => Math.min(imagens.length - 1, i + 1))} aria-label="Próxima imagem"
                       className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50 transition-all opacity-0 group-hover/carousel:opacity-100">
                       <ChevronRight className="w-4 h-4 text-gray-600" />
                     </button>
                   )}
                   <div className="flex gap-2 overflow-x-auto px-1 pb-1 scroll-smooth" style={{ scrollbarWidth: "none" }}>
                     {imagens.map((img, i) => (
-                      <button key={i} onClick={() => setActiveImg(i)}
+                      <button key={i} onClick={() => setActiveImg(i)} aria-label={`Ver imagem ${i + 1}`}
                         className={`relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
                           imgExibida === i
                             ? "border-[#1A50A0] shadow-md shadow-blue-900/15"
@@ -634,7 +638,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
             {/* Variações */}
             {temVariacoes && (
               <div className="mb-5">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">
                   Selecione as variações
                 </p>
                 <Seletores grupos={grupos} combinacoes={combinacoes} selecoes={selecao} onSelect={handleSelect} />
@@ -673,14 +677,14 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
             <div className="mt-auto">
               {/* Qty selector */}
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Quantidade</span>
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Quantidade</span>
                 <div className="flex items-center gap-0 border border-gray-200 rounded-xl overflow-hidden bg-white">
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))}
+                  <button onClick={() => setQty(q => Math.max(1, q - 1))} aria-label="Diminuir quantidade"
                     className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-500 border-r border-gray-100">
                     <Minus className="w-3.5 h-3.5" />
                   </button>
                   <span className="w-12 text-center text-sm font-bold text-gray-900">{qty}</span>
-                  <button onClick={() => setQty(q => q + 1)}
+                  <button onClick={() => setQty(q => q + 1)} aria-label="Aumentar quantidade"
                     className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-500 border-l border-gray-100">
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -705,7 +709,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                 )}
               </button>
 
-              <p className="mt-2.5 text-center text-xs text-gray-400">
+              <p className="mt-2.5 text-center text-xs text-gray-600">
                 Finalize seu pedido pelo carrinho no catálogo
               </p>
             </div>
@@ -718,7 +722,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
             <div className="flex items-end justify-between mb-6">
               <div>
                 <h2 className="text-lg font-black text-gray-900">Produtos Relacionados</h2>
-                <p className="text-sm text-gray-400 mt-0.5">
+                <p className="text-sm text-gray-600 mt-0.5">
                   Complete o seu estoque
                   {setorNome && <span className="text-[#1A50A0] font-medium"> · {setorNome}</span>}
                 </p>
@@ -738,7 +742,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
             </div>
           </section>
         )}
-      </div>
+      </main>
 
       {/* ── Carrinho drawer ── */}
       <AnimatePresence>
@@ -756,7 +760,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                   <h2 className="font-bold text-gray-900">Sua Lista</h2>
                   <p className="text-xs text-gray-400">{cartItems.reduce((s, i) => s + i.qty, 0)} item(s)</p>
                 </div>
-                <button onClick={() => setCartOpen(false)} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">
+                <button onClick={() => setCartOpen(false)} aria-label="Fechar carrinho" className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -778,17 +782,17 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-gray-800 leading-tight line-clamp-2 mb-2">{item.nome}</p>
                       <div className="flex items-center justify-between">
-                        <button onClick={() => removeFromCart(item.id)}
+                        <button onClick={() => removeFromCart(item.id)} aria-label="Remover item do carrinho"
                           className="text-gray-300 hover:text-red-500 transition-colors">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                         <div className="flex items-center gap-2 bg-white rounded-full border border-gray-100 px-2 py-1">
-                          <button onClick={() => updateCartQty(item.id, -1)}
+                          <button onClick={() => updateCartQty(item.id, -1)} aria-label="Diminuir quantidade"
                             className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-700">
                             <Minus className="w-3 h-3" />
                           </button>
                           <span className="text-xs font-bold text-gray-800 w-4 text-center">{item.qty}</span>
-                          <button onClick={() => updateCartQty(item.id, 1)}
+                          <button onClick={() => updateCartQty(item.id, 1)} aria-label="Aumentar quantidade"
                             className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-700">
                             <Plus className="w-3 h-3" />
                           </button>
@@ -832,7 +836,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
         ].map(({ label, href, icon: Icon }) => (
           <Link key={href} href={href}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${
-              href === "/catalogo" ? "text-[#1A50A0]" : "text-gray-400 hover:text-gray-600"
+              href === "/catalogo" ? "text-[#1A50A0]" : "text-gray-500 hover:text-gray-700"
             }`}>
             <Icon className="w-5 h-5" />
             <span className={`text-[10px] ${href === "/catalogo" ? "font-bold" : "font-medium"}`}>{label}</span>

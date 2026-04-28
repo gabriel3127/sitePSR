@@ -40,7 +40,7 @@ const ReviewCard = ({ review, index }: { review: Review; index: number }) => (
       </div>
       <div className="min-w-0">
         <p className="font-bold text-gray-900 text-sm leading-tight truncate">{review.name}</p>
-        <p className="text-xs text-gray-400 truncate">{review.business}</p>
+        <p className="text-xs text-gray-600 truncate">{review.business}</p>
       </div>
     </div>
     <div className="flex gap-0.5">
@@ -118,7 +118,7 @@ export default function DepoimentosClient() {
           </div>
 
           <footer className="border-t border-gray-200 mt-20 py-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
               <span>© {new Date().getFullYear()} PSR Embalagens. Todos os direitos reservados.</span>
               <div className="flex items-center gap-5">
                 <Link href="/" className="hover:text-[#1A50A0] transition-colors">Home</Link>
@@ -140,7 +140,7 @@ export default function DepoimentosClient() {
         ].map(({ label, href, icon: Icon }) => (
           <Link key={href} href={href}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${
-              href === "/catalogo" ? "text-[#1A50A0]" : "text-gray-400 hover:text-gray-600"
+              href === "/catalogo" ? "text-[#1A50A0]" : "text-gray-600 hover:text-gray-900"
             }`}>
             <Icon className="w-5 h-5" />
             <span className={`text-[10px] ${href === "/catalogo" ? "font-bold" : "font-medium"}`}>{label}</span>

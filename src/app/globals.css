@@ -102,11 +102,6 @@
     animation-delay: 0ms;
   }
 
-  .hero-heading {
-    animation: hero-fade-up 0.45s ease both;
-    animation-delay: 60ms;
-  }
-
   .hero-fade-in-delay-1 {
     animation: hero-fade-up 0.4s ease both;
     animation-delay: 300ms;

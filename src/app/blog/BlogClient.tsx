@@ -75,7 +75,7 @@ const PostCard = ({ post, index, isAdmin, onEditar, onTogglePublicado, onExcluir
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 768px) 100vw, 33vw" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">sem foto</div>
+            <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs">sem foto</div>
           )}
           <span className={`absolute top-3 left-3 flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${style.bg}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
@@ -142,7 +142,7 @@ const FeaturedPost = ({ post, isAdmin, onEditar, onTogglePublicado, onExcluir }:
             <Image src={post.foto_url} alt={post.titulo} fill
               className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="50vw" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">sem foto</div>
+            <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">sem foto</div>
           )}
           <span className={`absolute top-4 left-4 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${style.bg}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />{post.categoria?.toUpperCase()}
@@ -397,7 +397,7 @@ export default function BlogClient({ posts }: Props) {
         ].map(({ label, href, icon: Icon }) => (
           <Link key={href} href={href}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${
-              href === "/blog" ? "text-[#1A50A0]" : "text-gray-400 hover:text-gray-600"
+              href === "/blog" ? "text-[#1A50A0]" : "text-gray-600 hover:text-gray-900"
             }`}>
             <Icon className="w-5 h-5" />
             <span className={`text-[10px] ${href === "/blog" ? "font-bold" : "font-medium"}`}>{label}</span>

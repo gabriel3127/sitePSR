@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { LazyMotion, m, AnimatePresence } from "framer-motion"
+
+const loadFeatures = () => import("framer-motion").then((r) => r.domAnimation)
 import {
   Search, ShoppingBag, X, Send, Plus, Minus,
   SlidersHorizontal, ChevronLeft, ChevronRight,
@@ -98,26 +100,20 @@ const Footer = () => (
           <div className="mb-4">
             <Image src="/images/psr-logo.svg" alt="PSR Embalagens" width={90} height={32} className="h-8 w-auto brightness-0 invert opacity-70" />
           </div>
-          <p className="text-sm leading-relaxed text-gray-500 mb-5">
+          <p className="text-sm leading-relaxed text-gray-400 mb-5">
             Embalagens, descartáveis e produtos de limpeza para o seu negócio. Qualidade e variedade em um só lugar.
           </p>
           <div className="flex gap-3">
-            <a href="https://instagram.com/psrembalagens" target="_blank" rel="noopener noreferrer"
+            <a href="https://instagram.com/psrembalagens" aria-label="Instagram da PSR Embalagens" target="_blank" rel="noopener noreferrer"
               className="w-9 h-9 rounded-full border border-gray-800 flex items-center justify-center hover:border-gray-600 hover:text-gray-200 transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
               </svg>
             </a>
-            <a href="https://facebook.com/psrembalagens" target="_blank" rel="noopener noreferrer"
+            <a href="https://facebook.com/psrembalagens" aria-label="Facebook da PSR Embalagens" target="_blank" rel="noopener noreferrer"
               className="w-9 h-9 rounded-full border border-gray-800 flex items-center justify-center hover:border-gray-600 hover:text-gray-200 transition-colors">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-              </svg>
-            </a>
-            <a href="https://youtube.com/@psrembalagens" target="_blank" rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full border border-gray-800 flex items-center justify-center hover:border-gray-600 hover:text-gray-200 transition-colors">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
               </svg>
             </a>
           </div>
@@ -126,7 +122,7 @@ const Footer = () => (
           <p className="text-[11px] font-bold uppercase tracking-widest text-gray-300 mb-4">Institucional</p>
           <ul className="space-y-2.5">
             {["Sobre nós", "Política de privacidade", "Termos de uso", "Trabalhe conosco"].map(item => (
-              <li key={item}><Link href="#" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">{item}</Link></li>
+              <li key={item}><Link href="#" className="text-sm text-gray-400 hover:text-gray-100 transition-colors">{item}</Link></li>
             ))}
           </ul>
         </div>
@@ -134,24 +130,24 @@ const Footer = () => (
           <p className="text-[11px] font-bold uppercase tracking-widest text-gray-300 mb-4">Atendimento</p>
           <ul className="space-y-2.5">
             {["Central de ajuda", "Rastrear pedido", "Trocas e devoluções", "Fale conosco"].map(item => (
-              <li key={item}><Link href="#" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">{item}</Link></li>
+              <li key={item}><Link href="#" className="text-sm text-gray-400 hover:text-gray-100 transition-colors">{item}</Link></li>
             ))}
           </ul>
         </div>
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-gray-300 mb-4">Contato</p>
           <ul className="space-y-3">
-            <li className="flex items-start gap-2.5 text-sm text-gray-500">
-              <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-600" />
+            <li className="flex items-start gap-2.5 text-sm text-gray-400">
+              <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-500" />
               <span>SIA Trecho 3, Lote 1.245 — Brasília, DF</span>
             </li>
             <li className="flex items-center gap-2.5">
-              <Phone className="w-4 h-4 flex-shrink-0 text-gray-600" />
-              <a href="tel:+5561993177107" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">(61) 99317-7107</a>
+              <Phone className="w-4 h-4 flex-shrink-0 text-gray-500" />
+              <a href="tel:+5561993177107" className="text-sm text-gray-400 hover:text-gray-100 transition-colors">(61) 99317-7107</a>
             </li>
             <li className="flex items-center gap-2.5">
-              <Mail className="w-4 h-4 flex-shrink-0 text-gray-600" />
-              <a href="mailto:contato@psrembalagens.com.br" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">contato@psrembalagens.com.br</a>
+              <Mail className="w-4 h-4 flex-shrink-0 text-gray-500" />
+              <a href="mailto:contato@psrembalagens.com.br" className="text-sm text-gray-400 hover:text-gray-100 transition-colors">contato@psrembalagens.com.br</a>
             </li>
           </ul>
         </div>
@@ -159,10 +155,10 @@ const Footer = () => (
     </div>
     <div className="border-t border-gray-900">
       <div className="w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p className="text-xs text-gray-600">© {new Date().getFullYear()} PSR Embalagens. Todos os direitos reservados.</p>
+        <p className="text-xs text-gray-400">© {new Date().getFullYear()} PSR Embalagens. Todos os direitos reservados.</p>
         <div className="flex gap-4">
           {["Privacidade", "Cookies", "Termos"].map(item => (
-            <Link key={item} href="#" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">{item}</Link>
+            <Link key={item} href="#" className="text-xs text-gray-400 hover:text-gray-200 transition-colors">{item}</Link>
           ))}
         </div>
       </div>
@@ -460,6 +456,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
   }
 
   return (
+    <LazyMotion features={loadFeatures} strict>
     <div className={`min-h-screen bg-gray-50 pb-16 lg:pb-0 ${isAdmin ? "pt-10" : ""}`}>
 
       {isAdmin && (
@@ -513,7 +510,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
         <div className="lg:hidden h-14 flex items-center px-4 gap-2">
           <AnimatePresence initial={false} mode="wait">
             {searchOpen ? (
-              <motion.div key="open" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              <m.div key="open" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="flex-1 flex items-center gap-2">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -524,20 +521,20 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                 <button onClick={closeSearch} className="p-2 rounded-full text-gray-400 hover:bg-gray-100 flex-shrink-0">
                   <X className="w-5 h-5" />
                 </button>
-              </motion.div>
+              </m.div>
             ) : (
-              <motion.div key="closed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              <m.div key="closed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="flex-1 flex items-center gap-2">
                 <Link href="/" className="flex-shrink-0">
                   <Image src="/images/psr-logo.svg" alt="PSR Embalagens" width={80} height={32} className="h-8 w-auto" />
                 </Link>
                 <div className="flex-1" />
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <button onClick={openSearch}
+                  <button aria-label="Buscar produtos" onClick={openSearch}
                     className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition-colors">
                     <Search className="w-5 h-5" />
                   </button>
-                  <button onClick={() => setCartOpen(true)}
+                  <button aria-label="Abrir carrinho" onClick={() => setCartOpen(true)}
                     className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition-colors relative">
                     <ShoppingBag className="w-5 h-5" />
                     {totalItems > 0 && (
@@ -547,7 +544,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                     )}
                   </button>
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>
@@ -559,20 +556,20 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
           <div className="w-full px-6 py-6">
             <div className="mb-6">
               <h1 className="text-xl font-bold text-gray-900 mb-0.5">Explorar Catálogo</h1>
-              <p className="text-gray-400 text-xs">Encontre embalagens, descartáveis e produtos de limpeza para o seu negócio</p>
+              <p className="text-gray-600 text-xs">Encontre embalagens, descartáveis e produtos de limpeza para o seu negócio</p>
             </div>
 
             <div className="flex gap-6 items-start">
               {/* Sidebar */}
               <aside className="w-56 flex-shrink-0">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Categoria</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Categoria</p>
                 <div className="space-y-0.5 mb-5">
                   <button onClick={() => { setActiveCategoria(null); setActiveSubcategoria(null); setPaginaDesktop(1) }}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
                       !activeCategoria ? "bg-[#1A50A0] text-white font-semibold" : "text-gray-600 hover:bg-gray-100"
                     }`}>
                     <span>Todos</span>
-                    <span className="text-[11px] font-bold tabular-nums opacity-70">{totalTodos}</span>
+                    <span className="text-[11px] font-bold tabular-nums opacity-75">{totalTodos}</span>
                   </button>
                   {categoriasComContagem.map((c) => (
                     <button key={c.slug} onClick={() => { setActiveCategoria(c.slug); setActiveSubcategoria(null); setPaginaDesktop(1) }}
@@ -580,14 +577,14 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                         activeCategoria === c.slug ? "bg-[#1A50A0] text-white font-semibold" : "text-gray-600 hover:bg-gray-100"
                       }`}>
                       <span>{c.nome}</span>
-                      <span className="text-[11px] font-bold tabular-nums opacity-60">{c.count}</span>
+                      <span className="text-[11px] font-bold tabular-nums opacity-75">{c.count}</span>
                     </button>
                   ))}
                 </div>
                 {subcategoriasComContagem.length > 0 && (
                   <>
                     <div className="h-px bg-gray-100 mb-4" />
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Subcategoria</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Subcategoria</p>
                     <div className="space-y-0.5">
                       <button onClick={() => { setActiveSubcategoria(null); setPaginaDesktop(1) }}
                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
@@ -601,7 +598,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                             activeSubcategoria === s.slug ? "bg-[#1A50A0] text-white font-semibold" : "text-gray-600 hover:bg-gray-100"
                           }`}>
                           <span>{s.nome}</span>
-                          <span className="text-[11px] font-bold tabular-nums opacity-60">{s.count}</span>
+                          <span className="text-[11px] font-bold tabular-nums opacity-75">{s.count}</span>
                         </button>
                       ))}
                     </div>
@@ -631,11 +628,11 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                     )}
                   </p>
                   <div className="flex items-center gap-1.5">
-                    <button onClick={() => setViewMode("grid")}
+                    <button aria-label="Visualização em grade" onClick={() => setViewMode("grid")}
                       className={`w-7 h-7 flex items-center justify-center rounded-xl border transition-colors ${viewMode === "grid" ? "bg-[#1A50A0] text-white border-[#1A50A0]" : "border-gray-200 text-gray-400 hover:border-gray-300"}`}>
                       <Grid3X3 className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => setViewMode("list")}
+                    <button aria-label="Visualização em lista" onClick={() => setViewMode("list")}
                       className={`w-7 h-7 flex items-center justify-center rounded-xl border transition-colors ${viewMode === "list" ? "bg-[#1A50A0] text-white border-[#1A50A0]" : "border-gray-200 text-gray-400 hover:border-gray-300"}`}>
                       <List className="w-3.5 h-3.5" />
                     </button>
@@ -646,7 +643,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                   <div className="grid grid-cols-3 xl:grid-cols-4 gap-5">
                     <AnimatePresence mode="popLayout">
                       {produtosVisivelDesktop.map((product, index) => (
-                        <motion.div key={product.id} layout
+                        <m.div key={product.id} layout
                           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.18, delay: (index % POR_PAGINA_DESKTOP) * 0.02 }}>
@@ -664,13 +661,13 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                             </Link>
                             <div className="p-4">
                               {product.categorias && (
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{product.categorias.nome}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-600">{product.categorias.nome}</span>
                               )}
                               <Link href={produtoHref(product)} onClick={handleProdutoClick}>
                                 <h2 className="font-semibold text-gray-900 mt-0.5 leading-snug line-clamp-2 text-sm hover:text-gray-500 transition-colors">{product.nome}</h2>
                               </Link>
                               {product.descricao && (
-                                <p className="text-xs text-gray-400 mt-1 line-clamp-1">{product.descricao}</p>
+                                <p className="text-xs text-gray-500 mt-1 line-clamp-1">{product.descricao}</p>
                               )}
                               <Link href={produtoHref(product)} onClick={handleProdutoClick}
                                 className="mt-3.5 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#1A50A0] text-white text-xs font-bold hover:bg-[#153F80] transition-colors">
@@ -684,7 +681,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                               )}
                             </div>
                           </div>
-                        </motion.div>
+                        </m.div>
                       ))}
                     </AnimatePresence>
                   </div>
@@ -692,7 +689,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                   <div className="space-y-3">
                     <AnimatePresence mode="popLayout">
                       {produtosVisivelDesktop.map((product, index) => (
-                        <motion.div key={product.id} layout
+                        <m.div key={product.id} layout
                           initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0 }} transition={{ duration: 0.15, delay: index * 0.015 }}>
                           <div className={`flex gap-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-sm p-4 transition-all ${!product.ativo ? "opacity-50" : ""}`}>
@@ -706,7 +703,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                             </Link>
                             <div className="flex-1 min-w-0 py-0.5">
                               {product.categorias && (
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{product.categorias.nome}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-600">{product.categorias.nome}</span>
                               )}
                               <Link href={produtoHref(product)} onClick={handleProdutoClick}>
                                 <h2 className="font-semibold text-gray-900 text-sm leading-snug hover:text-gray-500 transition-colors">{product.nome}</h2>
@@ -726,7 +723,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                               Ver produto <ArrowRight className="w-3.5 h-3.5" />
                             </Link>
                           </div>
-                        </motion.div>
+                        </m.div>
                       ))}
                     </AnimatePresence>
                   </div>
@@ -754,7 +751,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
           <div className="bg-white px-4 pt-4 pb-3 -mx-4 flex items-center justify-between mb-4">
             <div>
               <h1 className="text-xl font-bold text-gray-900 leading-tight">Explorar Catálogo</h1>
-              <p className="text-xs text-gray-400 mt-0.5">Embalagens e descartáveis para o seu negócio</p>
+              <p className="text-xs text-gray-500 mt-0.5">Embalagens e descartáveis para o seu negócio</p>
             </div>
             <button onClick={() => setSidebarOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition-all ${
@@ -782,11 +779,11 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
               )}
             </p>
             <div className="flex items-center gap-1">
-              <button onClick={() => setViewMode("grid")}
+              <button aria-label="Visualização em grade" onClick={() => setViewMode("grid")}
                 className={`w-8 h-8 flex items-center justify-center rounded-xl border transition-colors ${viewMode === "grid" ? "bg-[#1A50A0] text-white border-[#1A50A0]" : "border-gray-200 text-gray-400"}`}>
                 <Grid3X3 className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => setViewMode("list")}
+              <button aria-label="Visualização em lista" onClick={() => setViewMode("list")}
                 className={`w-8 h-8 flex items-center justify-center rounded-xl border transition-colors ${viewMode === "list" ? "bg-[#1A50A0] text-white border-[#1A50A0]" : "border-gray-200 text-gray-400"}`}>
                 <List className="w-3.5 h-3.5" />
               </button>
@@ -797,25 +794,27 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
             <div className="grid grid-cols-2 gap-3 bg-gray-100">
               <AnimatePresence mode="popLayout">
                 {produtosVisivelMobile.map((product, index) => (
-                  <motion.div key={product.id} layout
-                    initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                  <m.div key={product.id} layout className="h-full"
+                    initial={index < 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2, delay: index < POR_PAGINA_MOBILE ? (index % 6) * 0.03 : 0 }}>
-                    <div className={`bg-white rounded-2xl overflow-hidden border border-gray-100 active:scale-[0.99] transition-transform ${!product.ativo ? "opacity-50" : ""}`}>
+                    <div className={`bg-white rounded-2xl overflow-hidden border border-gray-100 active:scale-[0.99] transition-transform flex flex-col h-full ${!product.ativo ? "opacity-50" : ""}`}>
                       <Link href={produtoHref(product)} onClick={handleProdutoClick}>
                         <div className="relative w-full aspect-square overflow-hidden bg-gray-50">
                           {product.foto_url ? (
-                            <Image src={product.foto_url} alt={product.nome} fill className="object-cover" sizes="50vw" />
+                            <Image src={product.foto_url} alt={product.nome} fill className="object-cover" sizes="50vw" priority={index === 0} fetchPriority={index === 0 ? "high" : "auto"}/>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-200"><ShoppingBag className="w-12 h-12" /></div>
                           )}
                         </div>
                       </Link>
-                      <div className="p-3">
+                      <div className="p-3 flex flex-col flex-1">
                         {product.categorias && (
-                          <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{product.categorias.nome}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wide text-gray-600">{product.categorias.nome}</span>
                         )}
                         <h2 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 mt-0.5">{product.nome}</h2>
+                        <div className="flex-1" />
                         <Link href={produtoHref(product)} onClick={handleProdutoClick}
                           className="mt-2.5 w-full flex items-center justify-center gap-1 py-2 rounded-xl bg-[#1A50A0] text-white text-xs font-bold hover:bg-[#153F80] transition-colors">
                           Ver produto <ArrowRight className="w-3 h-3" />
@@ -828,7 +827,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </m.div>
                 ))}
               </AnimatePresence>
             </div>
@@ -836,7 +835,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
             <div className="space-y-2.5">
               <AnimatePresence mode="popLayout">
                 {produtosVisivelMobile.map((product, index) => (
-                  <motion.div key={product.id} layout
+                  <m.div key={product.id} layout
                     initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }} transition={{ duration: 0.15, delay: index * 0.015 }}>
                     <div className={`flex gap-3 bg-white rounded-2xl border border-gray-100 p-3 ${!product.ativo ? "opacity-50" : ""}`}>
@@ -851,7 +850,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                         <div>
                           {product.categorias && (
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{product.categorias.nome}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-gray-600">{product.categorias.nome}</span>
                           )}
                           <h2 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 mt-0.5">{product.nome}</h2>
                         </div>
@@ -867,7 +866,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </m.div>
                 ))}
               </AnimatePresence>
             </div>
@@ -902,10 +901,10 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
       <AnimatePresence>
         {sidebarOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSidebarOpen(false)}
               className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm lg:hidden" />
-            <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
+            <m.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 250 }}
               className="fixed left-0 top-0 bottom-0 z-50 w-72 bg-white shadow-2xl flex flex-col lg:hidden">
               <div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -957,7 +956,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                   Ver {filtered.length} produtos
                 </button>
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>
@@ -966,9 +965,9 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
       <AnimatePresence>
         {cartOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setCartOpen(false)} className="fixed inset-0 bottom-16 lg:bottom-0 z-50 bg-black/20 backdrop-blur-sm" />
-            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            <m.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 250 }}
               className="fixed right-0 top-0 bottom-16 lg:bottom-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col">
               <div className="border-b border-gray-100 p-4 flex items-center justify-between">
@@ -1025,7 +1024,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                   </button>
                 </div>
               )}
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>
@@ -1034,8 +1033,8 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
       <AnimatePresence>
         {confirmLimpar && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm" />
+            <m.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-[60] flex items-center justify-center p-4">
               <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
                 <h3 className="font-bold text-gray-900 text-lg">Limpar lista?</h3>
                 <p className="text-gray-400 text-sm mt-2">Todos os produtos serão removidos. Essa ação não pode ser desfeita.</p>
@@ -1045,7 +1044,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                     className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600">Limpar tudo</button>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>
@@ -1060,7 +1059,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
         ].map(({ label, href, icon: Icon }) => (
           <Link key={href} href={href}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${
-              href === "/catalogo" ? "text-[#1A50A0]" : "text-gray-400 hover:text-gray-600"
+              href === "/catalogo" ? "text-[#1A50A0]" : "text-gray-500 hover:text-gray-700"
             }`}>
             <Icon className="w-5 h-5" />
             <span className={`text-[10px] ${href === "/catalogo" ? "font-bold" : "font-medium"}`}>{label}</span>
@@ -1068,5 +1067,6 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
         ))}
       </nav>
     </div>
+    </LazyMotion>
   )
 }

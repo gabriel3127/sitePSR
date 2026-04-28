@@ -127,7 +127,7 @@ const TiltCard = ({ product, disabled = false }: TiltCardProps) => {
         {/* Texto — só desktop */}
         <div className="hidden sm:flex p-5 flex-col flex-1" style={{ transform: "translateZ(8px)" }}>
           <h3 className="font-bold text-[#0D1B2A] text-base leading-snug">{product.title}</h3>
-          <p className="text-sm text-[#718096] mt-1.5 leading-relaxed flex-1">{product.description}</p>
+          <p className="text-sm text-[#556070] mt-1.5 leading-relaxed flex-1">{product.description}</p>
           <span className="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-[#1A50A0] group-hover:gap-2 transition-all">
             Ver no Catálogo <ArrowUpRight className="w-3.5 h-3.5" />
           </span>
@@ -168,7 +168,7 @@ const ProductGrid = () => {
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] leading-tight">
             Catálogo de embalagens para todos os segmentos
           </h2>
-          <p className="mt-4 text-[#718096] max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-[#556070] max-w-2xl mx-auto leading-relaxed">
             Ampla seleção de embalagens profissionais com entrega grátis em Brasília e região.
             Clique em uma categoria para ver o catálogo completo.
           </p>
@@ -231,7 +231,7 @@ const ProductGrid = () => {
               </div>
               <div className="hidden sm:block p-6 flex-shrink-0">
                 <h3 className="font-bold text-[#0D1B2A] text-xl leading-tight">{featuredProduct.title}</h3>
-                <p className="text-[#718096] mt-2 text-sm leading-relaxed">{featuredProduct.description}</p>
+                <p className="text-[#556070] mt-2 text-sm leading-relaxed">{featuredProduct.description}</p>
                 <span className="inline-flex items-center gap-1.5 mt-5 text-sm font-semibold text-[#1A50A0] group-hover:gap-2.5 transition-all">
                   Explorar categoria <ArrowUpRight className="w-4 h-4" />
                 </span>

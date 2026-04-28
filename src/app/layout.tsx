@@ -121,6 +121,9 @@ const schemaOrg = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={inter.variable}>
+      <head>
+        <link rel="preconnect" href="https://fqzxnnylmzjwvcukfxba.supabase.co" />
+      </head>
       <body className={`${inter.className} antialiased`}>
         {/* JSON-LD Schema inside the body is better for hydration in some Next.js versions */}
         <script
