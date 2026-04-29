@@ -611,7 +611,8 @@ export default function AdminOverlay({
       : variacoesLimpas
 
     const payload: any = {
-      nome: form.nome, descricao: form.descricao || null,
+      nome: form.nome, slug: slugify(form.nome),
+      descricao: form.descricao || null,
       obs: form.obs || null,
       ativo: form.ativo,
       foto_url: fotos[0] ?? null, fotos: fotos.length > 0 ? fotos : null,
