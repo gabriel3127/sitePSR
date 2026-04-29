@@ -3,6 +3,8 @@ import { Suspense } from "react"
 import { getProdutos, getSetores, getCategorias, getSubcategorias } from "@/lib/queries"
 import CatalogoClient from "./CatalogoClient"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Catálogo de Embalagens | PSR Embalagens Brasília",
   description:
