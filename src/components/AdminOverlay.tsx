@@ -623,6 +623,8 @@ export default function AdminOverlay({
 
     let produtoId: number
     if (modalProduto === 'novo') {
+      const { data: maxData } = await supabase.from('produtos').select('ordem').order('ordem', { ascending: false }).limit(1).single()
+      payload.ordem = (maxData?.ordem ?? 0) + 1
       const { data, error } = await supabase.from('produtos').insert(payload).select().single()
       if (error) { setErro(error.message); setSaving(false); return }
       produtoId = data.id

@@ -198,7 +198,10 @@ export async function getSubcategorias(): Promise<Subcategoria[]> {
     .from("subcategorias")
     .select("id, nome, slug, categoria_id, created_at")
     .order("nome")
-  if (error) throw error
+  if (error) {
+    console.error('Erro ao buscar subcategorias:', error)
+    return []
+  }
   return (data ?? []) as Subcategoria[]
 }
 

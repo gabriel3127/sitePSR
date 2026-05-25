@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { getProdutoBySlug, getProdutosSlugs, getProdutos } from "@/lib/queries"
 import ProdutoClient from "./ProdutoClient"
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ slug: string }>
 }
