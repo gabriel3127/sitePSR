@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion"
 import {
   ShoppingBag, Plus, Minus, ChevronRight, ChevronLeft,
   Check, Trash2, ArrowRight, X, ZoomIn, Send,
-  Truck, ShieldCheck, RefreshCw, MapPin, Phone, Mail,
+  MapPin, Phone, Mail,
   Home, BookOpen, MessageSquare
 } from "lucide-react"
 import Link from "next/link"
@@ -39,13 +39,13 @@ const Lightbox = ({ images, startIndex, onClose }: { images: string[]; startInde
   const next = () => setCurrent(i => (i + 1) % images.length)
   return (
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4" onClick={onClose}>
         <button onClick={onClose} aria-label="Fechar lightbox"
           className="absolute top-5 right-5 text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2.5 transition-colors z-10">
           <X className="w-5 h-5" />
         </button>
-        <motion.img key={current} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
+        <m.img key={current} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2 }} src={images[current]} alt=""
           className="max-h-[85vh] max-w-[90vw] object-contain rounded-xl shadow-2xl"
           onClick={e => e.stopPropagation()} />
@@ -69,7 +69,7 @@ const Lightbox = ({ images, startIndex, onClose }: { images: string[]; startInde
             </div>
           </>
         )}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   )
 }
@@ -425,12 +425,13 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
   const setorNome = produto.produto_setores?.[0]?.setores?.nome
 
   return (
+    <LazyMotion features={domAnimation} strict>
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
 
       {/* Toast */}
       <AnimatePresence>
         {added && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -441,7 +442,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
               <Check className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-semibold">Adicionado à lista!</span>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -506,7 +507,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
         <div className="grid lg:grid-cols-2 gap-8 xl:gap-14">
 
           {/* ── Galeria ── */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+          <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
 
             {/* ── MOBILE: carrossel com swipe + bolhinhas ── */}
             <div className="lg:hidden">
@@ -623,10 +624,10 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
               )}
             </div>
 
-          </motion.div>
+          </m.div>
 
           {/* ── Detalhes ── */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.08 }}
             className="flex flex-col">
 
@@ -668,7 +669,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
             {/* Resumo da seleção */}
             <AnimatePresence>
               {temVariacoes && todosGruposSelecionados && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+                <m.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }} className="mb-5 overflow-hidden">
                   <div className="bg-[#1A50A0]/5 border border-[#1A50A0]/15 rounded-xl px-4 py-3">
                     <div className="flex items-center gap-1.5 mb-1.5">
@@ -679,7 +680,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                       {grupos.map(g => selecao[g.label] && `${g.label}: ${selecao[g.label]}`).filter(Boolean).join(" · ")}
                     </p>
                   </div>
-                </motion.div>
+                </m.div>
               )}
             </AnimatePresence>
 
@@ -723,7 +724,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                 Finalize seu pedido pelo carrinho no catálogo
               </p>
             </div>
-          </motion.div>
+          </m.div>
         </div>
 
         {/* ── Produtos relacionados ── */}
@@ -744,10 +745,10 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {relacionados.map((p, i) => (
-                <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                <m.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06 }}>
                   <RelatedCard product={p} />
-                </motion.div>
+                </m.div>
               ))}
             </div>
           </section>
@@ -758,10 +759,10 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
       <AnimatePresence>
         {cartOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setCartOpen(false)} className="fixed inset-0 bottom-16 lg:bottom-0 z-[60] bg-black/20 backdrop-blur-sm" />
 
-            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            <m.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 250 }}
               className="fixed right-0 top-0 bottom-16 lg:bottom-0 z-[60] w-full max-w-md bg-white shadow-2xl flex flex-col">
 
@@ -825,7 +826,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                   </button>
                 </div>
               )}
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>
@@ -854,5 +855,6 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
         ))}
       </nav>
     </div>
+    </LazyMotion>
   )
 }
