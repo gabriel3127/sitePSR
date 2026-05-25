@@ -290,6 +290,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
   const [cartOpen, setCartOpen] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [breadcrumb, setBreadcrumb] = useState<{ tipo: string; slug: string; nome: string } | null>(null)
+  const [vendedor, setVendedor] = useState<{ slug: string; whatsapp: string; nome: string } | null>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -303,7 +304,15 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
     const nome = sessionStorage.getItem("psr_breadcrumb_nome")
     if (tipo && slug && nome) setBreadcrumb({ tipo, slug, nome })
     else setBreadcrumb(null)
+
+    const vSlug = sessionStorage.getItem("psr_vendedor_slug")
+    const vWa   = sessionStorage.getItem("psr_vendedor_whatsapp")
+    const vNome = sessionStorage.getItem("psr_vendedor_nome")
+    if (vSlug && vWa && vNome) setVendedor({ slug: vSlug, whatsapp: vWa, nome: vNome })
+    else setVendedor(null)
   }, [produto.id])
+
+  const catalogoHref = vendedor ? `/v/${vendedor.slug}` : "/catalogo"
 
   const refreshCart = () => {
     const c = getCart()
@@ -340,7 +349,8 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
       "📍 Pedido feito pelo catálogo online",
       "🌐 psrembalagens.com.br",
     ].join("\n")
-    window.open(`https://wa.me/5561993177107?text=${encodeURIComponent(msg)}`, "_blank")
+    const waNumber = vendedor?.whatsapp ?? "5561993177107"
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank")
   }
 
   // ── Derivações ────────────────────────────────────────────────────────────
@@ -439,7 +449,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
       <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
         <div className="container h-14 flex items-center justify-between gap-4">
           {/* Voltar */}
-          <Link href="/catalogo" aria-label="Voltar ao catálogo"
+          <Link href={catalogoHref} aria-label="Voltar ao catálogo"
             className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
             <ChevronLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Voltar ao catálogo</span>
@@ -474,13 +484,13 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
       <main className="container py-6 max-w-6xl">
 
          <nav className="flex items-center gap-1.5 text-xs text-gray-600 mb-6">
-          <Link href="/catalogo" className="hover:text-gray-900 transition-colors">Catálogo</Link>
+          <Link href={catalogoHref} className="hover:text-gray-900 transition-colors">Catálogo</Link>
 
           {breadcrumb && (
             <>
               <ChevronRight className="w-3 h-3" />
               <Link
-                href={`/catalogo?${breadcrumb.tipo}=${breadcrumb.slug}`}
+                href={`${catalogoHref}?${breadcrumb.tipo}=${breadcrumb.slug}`}
                 className="hover:text-gray-900 transition-colors"
               >
                 {breadcrumb.nome}
@@ -727,7 +737,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                   {setorNome && <span className="text-[#1A50A0] font-medium"> · {setorNome}</span>}
                 </p>
               </div>
-              <Link href="/catalogo"
+              <Link href={catalogoHref}
                 className="hidden sm:flex items-center gap-1 text-sm font-semibold text-[#1A50A0] hover:gap-2 transition-all">
                 Ver todos <ArrowRight className="w-4 h-4" />
               </Link>
@@ -830,16 +840,16 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 flex items-center lg:hidden">
         {[
           { label: "Início",      href: "/",            icon: Home },
-          { label: "Catálogo",    href: "/catalogo",    icon: ShoppingBag },
+          { label: "Catálogo",    href: catalogoHref,   icon: ShoppingBag },
           { label: "Blog",        href: "/blog",        icon: BookOpen },
           { label: "Depoimentos", href: "/depoimentos", icon: MessageSquare },
         ].map(({ label, href, icon: Icon }) => (
-          <Link key={href} href={href}
+          <Link key={label} href={href}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${
-              href === "/catalogo" ? "text-[#1A50A0]" : "text-gray-500 hover:text-gray-700"
+              label === "Catálogo" ? "text-[#1A50A0]" : "text-gray-500 hover:text-gray-700"
             }`}>
             <Icon className="w-5 h-5" />
-            <span className={`text-[10px] ${href === "/catalogo" ? "font-bold" : "font-medium"}`}>{label}</span>
+            <span className={`text-[10px] ${label === "Catálogo" ? "font-bold" : "font-medium"}`}>{label}</span>
           </Link>
         ))}
       </nav>

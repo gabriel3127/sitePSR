@@ -284,6 +284,17 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
   useEffect(() => {
     setCart(loadCart())
 
+    // Persiste (ou limpa) contexto do vendedor para a página de produto usar
+    if (vendedor) {
+      sessionStorage.setItem("psr_vendedor_slug",     vendedor.slug)
+      sessionStorage.setItem("psr_vendedor_whatsapp", vendedor.whatsapp)
+      sessionStorage.setItem("psr_vendedor_nome",     vendedor.nome)
+    } else {
+      sessionStorage.removeItem("psr_vendedor_slug")
+      sessionStorage.removeItem("psr_vendedor_whatsapp")
+      sessionStorage.removeItem("psr_vendedor_nome")
+    }
+
     // Se vier de /catalogo/setor/[setor], setorInicial já foi aplicado no useState
     // Só lê searchParams/sessionStorage se NÃO veio de rota de setor
     if (!setorInicial) {
