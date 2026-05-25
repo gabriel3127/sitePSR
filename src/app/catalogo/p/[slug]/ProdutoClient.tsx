@@ -525,7 +525,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                   <div key={i} className="relative w-full flex-shrink-0 snap-center aspect-square"
                     onClick={() => setLightboxOpen(true)}>
                     <Image src={img} alt={produto.nome} fill className="object-cover"
-                      sizes="100vw" priority={i === 0} />
+                      sizes="100vw" priority={i === 0} fetchPriority={i === 0 ? "high" : "auto"} />
                     {/* Badge categoria só na primeira */}
                     {i === 0 && produto.categorias && (
                       <div className="absolute top-3 left-3">
@@ -574,7 +574,7 @@ export default function ProdutoClient({ produto, todosProdutos }: Props) {
                 {imagens[imgExibida] ? (
                   <Image src={imagens[imgExibida]} alt={produto.nome} fill
                     className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                    sizes="50vw" priority />
+                    sizes="50vw" priority fetchPriority="high" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-200">
                     <ShoppingBag className="w-16 h-16" />
