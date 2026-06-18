@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 import { getProdutosSlugs, getPostsSlugs, getSetores } from "@/lib/queries"
 
-const BASE = "https://psrembalagens.com.br"
+const BASE = "https://www.psrembalagens.com.br"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const today = new Date()
