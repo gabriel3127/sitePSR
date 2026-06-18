@@ -4,6 +4,8 @@ import { getProdutos, getSetores, getCategorias, getSubcategorias } from '@/lib/
 import CatalogoClient from '@/app/catalogo/CatalogoClient'
 import type { Metadata } from 'next'
 
+export const revalidate = 3600
+
 type Props = { params: Promise<{ slug: string }> }
 
 async function getVendedor(slug: string) {
