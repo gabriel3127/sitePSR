@@ -18,5 +18,7 @@ export async function POST(request: NextRequest) {
     revalidatePath("/catalogo/p/[slug]", "page")
   }
 
+  revalidatePath("/v/[slug]", "page")
+
   return NextResponse.json({ revalidated: true, slug: slug ?? "all" })
 }
