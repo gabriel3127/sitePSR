@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
 }
 
-async function CatalogoData() {
+export default async function CatalogoPage() {
   const [produtos, setores, categorias, subcategorias] = await Promise.all([
     getProdutos(),
     getSetores(),
@@ -23,19 +23,25 @@ async function CatalogoData() {
   ])
 
   return (
-    <CatalogoClient
-      produtos={produtos}
-      setores={setores}
-      categorias={categorias}
-      subcategorias={subcategorias}
-    />
-  )
-}
+    <>
+      {/* Índice server-side para crawlers — não impacta JS nem layout */}
+      <nav aria-label="Índice de produtos" className="sr-only">
+        {setores.map(s => (
+          <a key={s.slug} href={`/catalogo/setor/${s.slug}`}>{s.nome}</a>
+        ))}
+        {produtos.map(p => (
+          <a key={p.id} href={`/catalogo/p/${p.slug ?? p.id}`}>{p.nome}</a>
+        ))}
+      </nav>
 
-export default function CatalogoPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen" />}>
-      <CatalogoData />
-    </Suspense>
+      <Suspense fallback={<div className="min-h-screen" />}>
+        <CatalogoClient
+          produtos={produtos}
+          setores={setores}
+          categorias={categorias}
+          subcategorias={subcategorias}
+        />
+      </Suspense>
+    </>
   )
 }
