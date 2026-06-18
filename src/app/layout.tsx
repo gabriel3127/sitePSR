@@ -14,14 +14,14 @@ export const metadata: Metadata = {
   },
   description:
     "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno. Atendimento rápido no CEASA Brasília.",
-  metadataBase: new URL("https://psrembalagens.com.br"),
+  metadataBase: new URL("https://www.psrembalagens.com.br"),
   alternates: { 
-    canonical: "/", // This will correctly resolve to https://psrembalagens.com.br/
+    canonical: "/", // This will correctly resolve to https://www.psrembalagens.com.br
   },
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://psrembalagens.com.br",
+    url: "https://www.psrembalagens.com.br",
     siteName: "PSR Embalagens",
     title: "PSR Embalagens | Distribuidora de Embalagens em Brasília",
     description: "Distribuidora de embalagens para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno.",
@@ -62,10 +62,10 @@ const schemaOrg = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://psrembalagens.com.br/#organization",
+      "@id": "https://www.psrembalagens.com.br/#organization",
       name: "PSR Embalagens",
-      url: "https://psrembalagens.com.br",
-      logo: { "@type": "ImageObject", url: "https://psrembalagens.com.br/images/psr-logo.svg" },
+      url: "https://www.psrembalagens.com.br",
+      logo: { "@type": "ImageObject", url: "https://www.psrembalagens.com.br/images/psr-logo.svg" },
       sameAs: ["https://instagram.com/psrembalagens", "https://facebook.com/psrembalagens"],
       contactPoint: {
         "@type": "ContactPoint",
@@ -77,15 +77,15 @@ const schemaOrg = {
     },
     {
       "@type": "LocalBusiness",
-      "@id": "https://psrembalagens.com.br/#localbusiness",
+      "@id": "https://www.psrembalagens.com.br/#localbusiness",
       name: "PSR Embalagens",
       description: "Distribuidora de embalagens, descartáveis e produtos de limpeza para mercados, gastronomia, lavanderias e muito mais. Entrega grátis no DF e entorno desde 2010.",
-      url: "https://psrembalagens.com.br",
+      url: "https://www.psrembalagens.com.br",
       telephone: "+55-61-99317-7107",
       email: "contato@psrembalagens.com.br",
       foundingDate: "2010",
       priceRange: "$$",
-      image: "https://psrembalagens.com.br/images/psr-logo.svg",
+      image: "https://www.psrembalagens.com.br/images/psr-logo.svg",
       address: {
         "@type": "PostalAddress",
         streetAddress: "CEASA — SIA Trecho 3, Lote 1.245",
@@ -100,18 +100,18 @@ const schemaOrg = {
         { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "07:00", closes: "12:00" },
       ],
       areaServed: [{ "@type": "City", name: "Brasília" }, { "@type": "State", name: "Distrito Federal" }],
-      hasOfferCatalog: { "@type": "OfferCatalog", name: "Catálogo de Embalagens e Descartáveis", url: "https://psrembalagens.com.br/catalogo" },
+      hasOfferCatalog: { "@type": "OfferCatalog", name: "Catálogo de Embalagens e Descartáveis", url: "https://www.psrembalagens.com.br/catalogo" },
       sameAs: ["https://instagram.com/psrembalagens", "https://facebook.com/psrembalagens"],
     },
     {
       "@type": "WebSite",
-      "@id": "https://psrembalagens.com.br/#website",
-      url: "https://psrembalagens.com.br",
+      "@id": "https://www.psrembalagens.com.br/#website",
+      url: "https://www.psrembalagens.com.br",
       name: "PSR Embalagens",
-      publisher: { "@id": "https://psrembalagens.com.br/#organization" },
+      publisher: { "@id": "https://www.psrembalagens.com.br/#organization" },
       potentialAction: {
         "@type": "SearchAction",
-        target: { "@type": "EntryPoint", urlTemplate: "https://psrembalagens.com.br/catalogo?q={search_term_string}" },
+        target: { "@type": "EntryPoint", urlTemplate: "https://www.psrembalagens.com.br/catalogo?q={search_term_string}" },
         "query-input": "required name=search_term_string",
       },
     },
