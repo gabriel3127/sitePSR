@@ -5,4 +5,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /v/
 
-Sitemap: https://psrembalagens.com.br/sitemap.xml
+Sitemap: https://www.psrembalagens.com.br/sitemap.xml
