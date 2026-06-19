@@ -635,7 +635,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
                   <p className="text-xs text-gray-500">
                     <span className="font-semibold text-gray-900">{filtered.length}</span> produto{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
                     {activeFiltersCount > 0 && (
-                      <button onClick={clearFilters} className="ml-2 text-gray-400 hover:text-gray-700 underline text-xs">limpar filtros</button>
+                      <button onClick={clearFilters} className="ml-2 text-gray-600 hover:text-gray-700 underline text-xs">limpar filtros</button>
                     )}
                   </p>
                   <div className="flex items-center gap-1.5">
@@ -786,7 +786,7 @@ export default function CatalogoClient({ produtos, setores, categorias, subcateg
             <p className="text-xs text-gray-500">
               <span className="font-semibold text-gray-900">{filtered.length}</span> produto{filtered.length !== 1 ? "s" : ""}
               {activeFiltersCount > 0 && (
-                <button onClick={clearFilters} className="ml-2 text-gray-400 underline">limpar</button>
+                <button onClick={clearFilters} className="ml-2 text-gray-600 underline">limpar</button>
               )}
             </p>
             <div className="flex items-center gap-1">
